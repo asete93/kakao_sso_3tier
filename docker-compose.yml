@@ -1,0 +1,20 @@
+version: '3.4'
+services:
+  mysql:
+    container_name: kakaologin-db
+    image: mysql:9.2
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile_DB
+    volumes:
+      - ./Database/data/db/conf.d:/etc/mysql/conf.d
+      - ./Database/data/db/data:/var/lib/mysql
+    ports:
+      - 3348:3306
+    restart: always
+    environment:
+      - MYSQL_USER=kakao
+      - MYSQL_ROOT_PASSWORD=Zmffkdnem12
+      - MYSQL_PASSWORD=Zmffkdnem12
+      - MYSQL_DATABASE=kakao
+    mem_limit: 4096M
