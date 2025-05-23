@@ -1,13 +1,12 @@
 package com.camel.api.services.kakao.service;
 
-import java.util.Date;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.camel.api.services.token.service.JwtTokenService;
 import com.camel.api.services.user.dao.User;
 import com.camel.api.services.user.service.UserService;
 import com.camel.common.ApiClient;
@@ -24,6 +23,9 @@ public class KakaoLoginService {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    JwtTokenService jwtTokenService;
 
     @Value("${kakao.oauth-url}")
     private String KAKAO_OAUTH_URL;
@@ -63,26 +65,20 @@ public class KakaoLoginService {
         // Step 3. Check User Exists
         User existUser = userService.getActiveUserByUserIdAndProvider(userId, "KAKAO");
 
+        CustomMap tokenMap = new CustomMap();
+        tokenMap.put("userId",userId);
+
         // Step 4. 없는 경우 회원가입 유도.
         if(existUser == null){
-            // 임시로 강제 가입처리
-            CustomMap saveUserInfo = new CustomMap();
-            saveUserInfo.put("userId",userId);
-            saveUserInfo.put("userName",userName);
-            saveUserInfo.put("provider","KAKAO");
-            saveUserInfo.put("createdAt",new Date());
+            tokenMap.put("provider","KAKAO");
+            tokenMap.put("needSignup",true);
 
-            userService.saveUser(saveUserInfo);
+            resultMap = jwtTokenService.createJwtTokenMap(tokenMap);
 
         // Step 5. 있는 경우 로그인 성공
         } else {
-            
+            resultMap = jwtTokenService.createJwtTokenMap(tokenMap);
         }
-
-
-        
-
-        resultMap = kakaoUserInfo;
 
         return resultMap;
     }

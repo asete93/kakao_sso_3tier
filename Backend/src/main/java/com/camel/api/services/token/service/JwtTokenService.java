@@ -17,23 +17,20 @@ import io.jsonwebtoken.security.Keys;
 @Service
 public class JwtTokenService {
     
-    @Value("{jwt.token.secret}")
+    @Value("${jwt.token.secret}")
     private String JWT_TOKEN_SECRET;
 
     private String JWT_ISSUER = "CAMEL_API";
 
-    private Integer ONE_SEC = 1000;
-    private Integer ONE_MINUTE = ONE_SEC * 60;
-    private Integer ONE_HOUR = ONE_MINUTE * 60;
+    private static Integer ONE_SEC = 1000;
+    private static Integer ONE_MINUTE = ONE_SEC * 60;
+    private static Integer ONE_HOUR = ONE_MINUTE * 60;
 
     // access_token 유효시간 (30분)
-    private Integer ACCESS_TOKEN_TIME_MILLIS = ONE_MINUTE * 30 ;
+    public static Integer ACCESS_TOKEN_TIME_MILLIS = ONE_MINUTE * 30 ;
 
     // refresh_token 유효시간 (1 day)
-    private Integer REFRESH_TOKEN_TIME_MILLIS = ONE_HOUR * 24;
-
-
-    
+    public static Integer REFRESH_TOKEN_TIME_MILLIS = ONE_HOUR * 24;
 
 
 
@@ -48,6 +45,8 @@ public class JwtTokenService {
     public CustomMap createJwtTokenMap(CustomMap claim) throws Exception {
         CustomMap tokenMap = new CustomMap();
 
+        tokenMap.put("access_token",createAccessToken(claim));
+        tokenMap.put("refresh_token",createRefreshToken());
 
         return tokenMap;
     }
@@ -92,8 +91,18 @@ public class JwtTokenService {
      * 
      ******************************************************************************************/
     private String createRefreshToken() throws Exception {
+        SecretKey key = Keys.hmacShaKeyFor(JWT_TOKEN_SECRET.getBytes(StandardCharsets.UTF_8));
 
-        return "";
+        long nowMillis = System.currentTimeMillis();
+        Date now = new Date(nowMillis);
+        Date exp = new Date(nowMillis + REFRESH_TOKEN_TIME_MILLIS);
+
+        return Jwts.builder()
+                .setIssuer(JWT_ISSUER)
+                .setIssuedAt(now)
+                .setExpiration(exp)
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
     }
 
 
