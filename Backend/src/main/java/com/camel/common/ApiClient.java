@@ -7,6 +7,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
@@ -26,6 +27,13 @@ public class ApiClient {
     final static String CHARSET_UTF_8 = "UTF-8";
 
 
+    // CloseableHttpClient 생성
+    public CloseableHttpClient createClient() throws Exception {
+        CookieStore cookieStore = new BasicCookieStore();
+        return createClient(cookieStore);
+    }
+
+
     public CloseableHttpClient createClient(CookieStore cookieStore) throws Exception {
         CloseableHttpClient httpClient = HttpClientBuilder.create()
 				.setDefaultCookieStore(cookieStore) // Set CookieStore
@@ -34,7 +42,20 @@ public class ApiClient {
         return httpClient;
     }
 
+
     // Get
+    public CustomMap getClient(String url) throws Exception {
+        try(CloseableHttpClient client = createClient()){
+            return getClient(client, url, null); // Call Overloaded Method
+        }
+    }
+
+    public CustomMap getClient(String url, CustomMap headers) throws Exception {
+        try(CloseableHttpClient client = createClient()){
+            return getClient(client, url, headers); // Call Overloaded Method
+        }
+    }
+
     public CustomMap getClient(CloseableHttpClient client, String url) throws Exception {
         return getClient(client, url, null); // Call Overloaded Method
     }
@@ -45,10 +66,10 @@ public class ApiClient {
         // 헤더 비어있는 경우, 기본 헤더 설정하기.
         if(headers == null || headers.isEmpty()){
             headers = createDefaultHeader(headers, METHOD_GET);
-            
-            for(String key : headers.keySet()){
-                get.setHeader(key, headers.getString(key));
-            }
+        }
+
+        for(String key : headers.keySet()){
+            get.setHeader(key, headers.getString(key));
         }
 
         CloseableHttpResponse response = client.execute(get);
@@ -58,6 +79,18 @@ public class ApiClient {
 
 
     // Post
+    public CustomMap postClient(String url, CustomMap param) throws Exception {
+        try(CloseableHttpClient client = createClient()){
+            return postClient(client, url, param, null);  // Call Overloaded Method
+        }
+    }
+
+    public CustomMap postClient(String url, CustomMap param, CustomMap headers) throws Exception {
+        try(CloseableHttpClient client = createClient()){
+            return postClient(client, url, param, headers);  // Call Overloaded Method
+        }
+    }
+
     public CustomMap postClient(CloseableHttpClient client, String url, CustomMap param) throws Exception {
         return postClient(client, url, param, null); // Call Overloaded Method
     }
@@ -65,13 +98,17 @@ public class ApiClient {
     public CustomMap postClient(CloseableHttpClient client, String url, CustomMap param, CustomMap headers) throws Exception {
         HttpPost post = new HttpPost(url);
 
+        if(param == null){
+            param = new CustomMap();
+        }
+
         // 헤더 비어있는 경우, 기본 헤더 설정하기.
         if(headers == null || headers.isEmpty()){
             headers = createDefaultHeader(headers, METHOD_POST);
-            
-            for(String key : headers.keySet()){
-                post.setHeader(key, headers.getString(key));
-            }
+        }
+
+        for(String key : headers.keySet()){
+            post.setHeader(key, headers.getString(key));
         }
 
         post.setEntity(new StringEntity(param.toJson()));
@@ -83,6 +120,18 @@ public class ApiClient {
 
 
     // Put
+    public CustomMap putClient(String url, CustomMap param) throws Exception {
+        try(CloseableHttpClient client = createClient()){
+            return putClient(client, url, param, null);  // Call Overloaded Method
+        }
+    }
+
+    public CustomMap putClient(String url, CustomMap param, CustomMap headers) throws Exception {
+        try(CloseableHttpClient client = createClient()){
+            return putClient(client, url, param, headers);  // Call Overloaded Method
+        }
+    }
+
     public CustomMap putClient(CloseableHttpClient client, String url, CustomMap param) throws Exception {
         return putClient(client, url, param, null); // Call Overloaded Method
     }
@@ -90,13 +139,18 @@ public class ApiClient {
     public CustomMap putClient(CloseableHttpClient client, String url, CustomMap param, CustomMap headers) throws Exception {
         HttpPut put = new HttpPut(url);
 
+        if(param == null){
+            param = new CustomMap();
+        }
+
         // 헤더 비어있는 경우, 기본 헤더 설정하기.
         if(headers == null || headers.isEmpty()){
             headers = createDefaultHeader(headers, METHOD_PUT);
             
-            for(String key : headers.keySet()){
-                put.setHeader(key, headers.getString(key));
-            }
+        }
+
+        for(String key : headers.keySet()){
+            put.setHeader(key, headers.getString(key));
         }
 
         put.setEntity(new StringEntity(param.toJson()));
@@ -109,6 +163,18 @@ public class ApiClient {
 
 
     // Delete
+    public CustomMap deleteClient(String url) throws Exception {
+        try(CloseableHttpClient client = createClient()){
+            return deleteClient(client, url, null);  // Call Overloaded Method
+        }
+    }
+
+    public CustomMap deleteClient(String url, CustomMap headers) throws Exception {
+        try(CloseableHttpClient client = createClient()){
+            return deleteClient(client, url, headers);  // Call Overloaded Method
+        }
+    }
+
     public CustomMap deleteClient(CloseableHttpClient client, String url) throws Exception {
         return deleteClient(client, url, null); // Call Overloaded Method
     }
@@ -120,9 +186,10 @@ public class ApiClient {
         if(headers == null || headers.isEmpty()){
             headers = createDefaultHeader(headers, METHOD_DELETE);
             
-            for(String key : headers.keySet()){
-                delete.setHeader(key, headers.getString(key));
-            }
+        }
+
+        for(String key : headers.keySet()){
+            delete.setHeader(key, headers.getString(key));
         }
 
         CloseableHttpResponse response = client.execute(delete);

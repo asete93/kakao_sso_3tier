@@ -1,10 +1,11 @@
 package com.camel.common;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
-import java.util.ArrayList;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class CustomMap extends HashMap<String, Object> {
 
@@ -16,12 +17,6 @@ public class CustomMap extends HashMap<String, Object> {
         }
         throw new IllegalArgumentException("Value is not a Map");
     }
-
-    // // Map을 반환하는 메소드
-    // public CustomMap get(String key) {
-    //     Object value = this.get(key);
-    //     return new CustomMap((Map) value);
-    // }
 
     // List를 반환하는 메소드
     public List<Object> getArray(String key) {
@@ -56,6 +51,22 @@ public class CustomMap extends HashMap<String, Object> {
             return (String) value;
         }
         throw new IllegalArgumentException("Value is not a String");
+    }
+
+    public Long getLong(String key) {
+        Object value = this.get(key);
+        if (value instanceof Long) {
+            return (Long) value;
+        } else if (value instanceof Integer) {
+            return ((Integer) value).longValue();
+        } else if (value instanceof String) {
+            try {
+                return Long.parseLong((String) value);
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Value is not a Long");
+            }
+        }
+        throw new IllegalArgumentException("Value is not a Long");
     }
 
     public int getInt(String key) {

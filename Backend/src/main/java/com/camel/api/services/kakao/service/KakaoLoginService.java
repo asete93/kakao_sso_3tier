@@ -1,17 +1,19 @@
 package com.camel.api.services.kakao.service;
 
-import org.apache.http.Header;
-import org.apache.http.client.CookieStore;
-import org.apache.http.cookie.Cookie;
-import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.CloseableHttpClient;
+import java.util.Date;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.camel.api.services.user.dao.User;
+import com.camel.api.services.user.service.UserService;
 import com.camel.common.ApiClient;
+import com.camel.common.CommonUtils;
 import com.camel.common.CustomMap;
+import com.camel.common.cusotmException.ThrowCustomMapException;
 
 @Service
 public class KakaoLoginService {
@@ -20,65 +22,152 @@ public class KakaoLoginService {
     @Autowired
     ApiClient apiClient;
 
-    public CustomMap testAPI(CustomMap param) throws Exception {
-        CustomMap returnMap = new CustomMap();
+    @Autowired
+    UserService userService;
 
-        CookieStore cookieStore = new BasicCookieStore();
-        CloseableHttpClient client = apiClient.createClient(cookieStore);
+    @Value("${kakao.oauth-url}")
+    private String KAKAO_OAUTH_URL;
 
-        // Step1. ID
-        CustomMap result = apiClient.postClient(client, "https://pam.kicloud.kisti.re.kr/api/v3/flows/executor/default-authentication-flow/",param);
+    @Value("${kakao.grant-type}")
+    private String KAKAO_OAUTH_GRANT_TYPE;
 
-        if(result.getInt("status") == 302){
-            Header[] headers = (Header[]) result.get("headers");
-            String newUrl = "";
-            for(Header header : headers){
-                if(header.getName().equals("Location")){
-                    newUrl = "https://pam.kicloud.kisti.re.kr" + header.getValue();
-                    break;
-                }
-            }
-            
-            for(Cookie cookie: cookieStore.getCookies()){
-                System.out.println(cookie.getName() + " = " + cookie.getValue() );
-            }
-            System.out.println("REDIRECTED 11 /" + newUrl);
-            result = apiClient.getClient(client, newUrl);
+    @Value("${kakao.client-id}")
+    private String KAKAO_OAUTH_CLIENT_ID;
+
+    @Value("${kakao.kakao-user-info-url}")
+    private String GET_KAKAO_USER_INFO_URL;
+
+
+    /* ****************************************************************************************
+     * Title            :   카카오 SSO 로그인 처리
+     * Scope            :   public
+     * Function Name    :   kakaoOauthLogin                                                    
+     * ----------------------------------------------------------------------------------------
+     * Description      :   Kakao OAuth 인증을 통해 로그인 처리 프로세스,                        
+     *                          1. DB에 계정 존재 확인 후, 없다면 회원 가입 유도.
+     *                          2. DB에 계정 존재 확인 후, 존재한다면 로그인 완료 처리.
+     * 
+     ******************************************************************************************/
+    public CustomMap kakaoOauthLogin(String code) throws Exception {
+        CustomMap resultMap = new CustomMap();
+
+        // Step 1. Get Kakao Access Token
+        String kakaoAccessToken = getKakaoAccessToken(code);
+
+        // Step 2. Get Kakao User Info
+        CustomMap kakaoUserInfo = getKakaoUserInfo(kakaoAccessToken);
+
+        String userId = kakaoUserInfo.getString("id");
+        String userName = kakaoUserInfo.getString("nickname");
+
+        // Step 3. Check User Exists
+        User existUser = userService.getActiveUserByUserIdAndProvider(userId, userName);
+
+        // Step 4. 없는 경우 회원가입 유도.
+        if(existUser == null){
+            // 임시로 강제 가입처리
+            CustomMap saveUserInfo = new CustomMap();
+            saveUserInfo.put("userId",userId);
+            saveUserInfo.put("userName",userName);
+            saveUserInfo.put("provider","KAKAO");
+            saveUserInfo.put("createdAt",new Date());
+
+            userService.saveUser(saveUserInfo);
+
+            System.out.println("유저 생성처리 완료");
+        // Step 5. 있는 경우 로그인 성공
+        } else {
+            System.out.println("이미 있는 유저다");
         }
 
-        returnMap.put("status" ,result.get("status"));
-        returnMap.put("body",result.get("body"));
 
-        for(Cookie cookie: cookieStore.getCookies()){
-            System.out.println(cookie.getName() + " = " + cookie.getValue() );
+        
+
+        resultMap = kakaoUserInfo;
+
+        return resultMap;
+    }
+
+
+
+
+
+
+
+    /* ****************************************************************************************
+     * Title            :   카카오 정보 가져오기
+     * Scope            :   private
+     * Function Name    :   getKakaoUserInfo
+     * ----------------------------------------------------------------------------------------
+     * Description      :   카카오 로그인 회원 정보 가져오기
+     * 
+     ******************************************************************************************/
+    private CustomMap getKakaoUserInfo(String accessToken) throws Exception {
+        CustomMap headers = new CustomMap();
+        headers.put("Authorization",CommonUtils.makeBearerTokenFormat(accessToken));
+
+        // User Info 조회
+        CustomMap apiResult = apiClient.getClient(GET_KAKAO_USER_INFO_URL, headers);
+        int status = apiResult.getInt("status");
+
+        if(status==200){
+            apiResult = new CustomMap(apiResult.getString("body"));
+            CustomMap userInfo = new CustomMap();
+            userInfo.put("id", apiResult.getLong("id")+"");
+            userInfo.put("nickname", apiResult.getMap("properties").getString("nickname"));
+
+            return userInfo;
+        } else {
+            throw new ThrowCustomMapException("카카오 계정 정보를 가져오는 과정에서 오류가 발생하였습니다.", new CustomMap(), 401);
         }
+    }
 
-        // Step2. PWD
-        result = apiClient.postClient(client, "https://pam.kicloud.kisti.re.kr/api/v3/flows/executor/default-authentication-flow/",param);
 
-        if(result.getInt("status") == 302){
-            Header[] headers = (Header[]) result.get("headers");
-            String newUrl = "";
-            for(Header header : headers){
-                if(header.getName().equals("Location")){
-                    newUrl = "https://pam.kicloud.kisti.re.kr" + header.getValue();
-                    break;
-                }
-            }
-            
-            System.out.println("REDIRECTED 22/" + newUrl);
-            result = apiClient.getClient(client, newUrl);
+
+
+
+    
+    /* ****************************************************************************************
+     * Title            :   카카오 Access Token 발급
+     * Scope            :   private
+     * Function Name    :   getKakaoAccessToken                                                    
+     * ----------------------------------------------------------------------------------------
+     * Description      :   Kakao OAuth 인증을 통해 AccessToken 가져오기
+     * 
+     ******************************************************************************************/
+    private String getKakaoAccessToken(String code) throws Exception {
+        // Header
+        CustomMap oauthHeader = new CustomMap();
+        oauthHeader.put("Content-Type","application/x-www-form-urlencoded");
+
+        // Call Kakao Oauth API
+        CustomMap apiResult = apiClient.postClient(makeKakaoOauthUrl(code), null, oauthHeader);
+        
+        int status = apiResult.getInt("status");
+
+        if(status == 200){
+            return new CustomMap(apiResult.getString("body")).getString("access_token");
+        } else {
+            throw new ThrowCustomMapException("카카오 접속 정보가 올바르지 않습니다.", new CustomMap(), 401);
         }
+    }
 
-        for(Cookie cookie: cookieStore.getCookies()){
-            System.out.println(cookie.getName() + " = " + cookie.getValue() );
-        }
 
-        returnMap.put("status" ,result.get("status"));
-        returnMap.put("body",result.get("body"));
 
-        client.close();
 
-        return returnMap;
+
+    /* ****************************************************************************************
+     * Title            :   카카오 인증 URL 생성
+     * Scope            :   private
+     * Function Name    :   makeKakaoOauthUrl                                                    
+     * ----------------------------------------------------------------------------------------
+     * Description      :   Kakao OAuth 인증 URL Format으로 변환
+     * 
+     ******************************************************************************************/
+    private String makeKakaoOauthUrl(String code){
+        return String.format("%s?%s&%s&code=%s", 
+                                    KAKAO_OAUTH_URL
+                                    ,KAKAO_OAUTH_GRANT_TYPE
+                                    ,KAKAO_OAUTH_CLIENT_ID,code);
     }
 }

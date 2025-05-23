@@ -12,7 +12,7 @@
 1. Ubuntu 22.04 기준으로 작성되었음.
 본 프로젝트에서는 하위 3 Tier 구조로 KakaoLogin 인증 기능을 구성합니다.
 
-Frontend - React (Next.js 14) - node version v18.19.1
+Frontend - React (Next.js 14) - node version 20.19.0
 Backend - JAVA (STS 3.0.1) - openjdk:17-jdk-slim
 Database - MySQL (9.2)
 

@@ -1,9 +1,5 @@
 package com.camel.common;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.sql.Timestamp;
@@ -14,6 +10,10 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Map;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class CommonUtils {
 
@@ -162,5 +162,19 @@ public class CommonUtils {
         // DateTimeFormatter로 T 없이 포맷
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         return localDateTime.format(formatter);
+    }
+
+
+    public static CustomMap removeHeaderCustomMap(CustomMap param) {
+        if(param.containsKey("headers")){
+            param.remove("headers");
+        }
+
+        return param;
+    }
+
+
+    public static String makeBearerTokenFormat(String token){
+        return String.format("Bearer %s", token);
     }
  }
