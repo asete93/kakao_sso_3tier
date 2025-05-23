@@ -61,7 +61,7 @@ public class KakaoLoginService {
         String userName = kakaoUserInfo.getString("nickname");
 
         // Step 3. Check User Exists
-        User existUser = userService.getActiveUserByUserIdAndProvider(userId, userName);
+        User existUser = userService.getActiveUserByUserIdAndProvider(userId, "KAKAO");
 
         // Step 4. 없는 경우 회원가입 유도.
         if(existUser == null){
@@ -74,10 +74,9 @@ public class KakaoLoginService {
 
             userService.saveUser(saveUserInfo);
 
-            System.out.println("유저 생성처리 완료");
         // Step 5. 있는 경우 로그인 성공
         } else {
-            System.out.println("이미 있는 유저다");
+            
         }
 
 
