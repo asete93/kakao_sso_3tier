@@ -2,30 +2,28 @@
 import { useEffect } from "react";
 import * as Styled from "./page.styled";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
+import axios from "axios";
 
 const Index = () => {
-    const redirectUri = `http://100.68.107.86:8084/api/v1/login/`;
-    const scope = [
-        'profile_nickname'
-    ].join(',');
+    const param = useSearchParams();
 
     useEffect(() => {
-        if (window?.Kakao) {
-            if (!window.Kakao.isInitialized()) {
-                window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_JS_KEY);
-                console.log('after Init: ', window.Kakao.isInitialized());
-            }
+        const code = param.get("code");
+        if (code) {
+            // 카카오 로그인 성공 후, 백엔드로 코드 전송
+            axios.post(`/login/kakao`,{code:code}).then((response) => {
+                console.log("response : ",response)
+            })
         }
     }, []);
 
 
     const kakaoLoginHandler = () => {
-        // 인가 코드 받기 위해서, 리다이렉트 페이지로 이동
-        window.Kakao.Auth.authorize({
-            redirectUri,
-            scope,
-        });
-        console.log('Kakao Logining'); // 확인용 로그
+        const REDIRECT_URI = `http://100.68.107.86:3002/login`;
+        const KAKAO_REST_API_KEY = process.env.NEXT_PUBLIC_KAKAO_REST_KEY;
+        const kakaoRedirectUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${KAKAO_REST_API_KEY}&redirect_uri=${REDIRECT_URI}`;
+        window.location.href = kakaoRedirectUrl;
     };
 
 

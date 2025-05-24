@@ -22,15 +22,15 @@ public class JwtTokenService {
 
     private String JWT_ISSUER = "CAMEL_API";
 
-    private static Integer ONE_SEC = 1000;
+    private static Integer ONE_SEC = 1;
     private static Integer ONE_MINUTE = ONE_SEC * 60;
     private static Integer ONE_HOUR = ONE_MINUTE * 60;
 
     // access_token 유효시간 (30분)
-    public static Integer ACCESS_TOKEN_TIME_MILLIS = ONE_MINUTE * 30 ;
+    public static Integer ACCESS_TOKEN_TIME = ONE_MINUTE * 30 ;
 
     // refresh_token 유효시간 (1 day)
-    public static Integer REFRESH_TOKEN_TIME_MILLIS = ONE_HOUR * 24;
+    public static Integer REFRESH_TOKEN_TIME = ONE_HOUR * 24;
 
 
 
@@ -67,7 +67,7 @@ public class JwtTokenService {
 
         long nowMillis = System.currentTimeMillis();
         Date now = new Date(nowMillis);
-        Date exp = new Date(nowMillis + ACCESS_TOKEN_TIME_MILLIS);
+        Date exp = new Date(nowMillis + ACCESS_TOKEN_TIME);
 
         return Jwts.builder()
                 .setSubject(claim.getString("userId"))
@@ -95,7 +95,7 @@ public class JwtTokenService {
 
         long nowMillis = System.currentTimeMillis();
         Date now = new Date(nowMillis);
-        Date exp = new Date(nowMillis + REFRESH_TOKEN_TIME_MILLIS);
+        Date exp = new Date(nowMillis + REFRESH_TOKEN_TIME);
 
         return Jwts.builder()
                 .setIssuer(JWT_ISSUER)
