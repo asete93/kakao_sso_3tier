@@ -5,17 +5,24 @@ import java.sql.Date;
 
 import javax.crypto.SecretKey;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.camel.api.services.user.dao.User;
+import com.camel.api.services.user.service.UserService;
 import com.camel.common.CustomMap;
 
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 
 @Service
 public class JwtTokenService {
+
+    @Autowired
+    private UserService userService;
     
     @Value("${jwt.token.secret}")
     private String JWT_TOKEN_SECRET;
@@ -42,11 +49,45 @@ public class JwtTokenService {
      * Description      :   access_token, refresh_token 이 담긴 CustomMap 생성
      * 
      ******************************************************************************************/
-    public CustomMap createJwtTokenMap(CustomMap claim) throws Exception {
+    public CustomMap createJwtTokenMap(CustomMap param) throws Exception {
         CustomMap tokenMap = new CustomMap();
+        CustomMap claim = new CustomMap();
+
+        // ID 없는 경우, 회원가입 유도
+        if(param == null || !param.containsKey("id")) {
+            claim.put("needSignup", true);
+            
+            if(param != null && param.containsKey("userId")) {
+                claim.put("userId", param.getString("userId"));
+            }
+            if(param != null && param.containsKey("provider")) {
+                claim.put("provider", param.getString("provider"));
+            }
+            if(param != null && param.containsKey("userName")) {
+                claim.put("userName", param.getString("userName"));
+            }
+
+        // ID 있는 경우, 사용자 정보 가져오기
+        } else {
+            User user = getUserInfo(param.getInt("id"));
+
+            // 사용자 정보가 없을 경우, 회원가입 유도
+            if(user == null) {
+                claim.put("needSignup", true);
+
+            // 사용자 정보 있을 경우, Calim 설정
+            } else {
+                claim.put("userId", user.getUserId());
+                claim.put("id", user.getId());
+                claim.put("provider", user.getProvider());
+                claim.put("username", user.getUserName());
+                claim.put("needSignup", false);
+            }
+        }
+        
 
         tokenMap.put("access_token",createAccessToken(claim));
-        tokenMap.put("refresh_token",createRefreshToken());
+        tokenMap.put("refresh_token",createRefreshToken(claim));
 
         return tokenMap;
     }
@@ -70,7 +111,6 @@ public class JwtTokenService {
         Date exp = new Date(nowMillis + ACCESS_TOKEN_TIME);
 
         return Jwts.builder()
-                .setSubject(claim.getString("userId"))
                 .setIssuer(JWT_ISSUER)
                 .setIssuedAt(now)
                 .setExpiration(exp)
@@ -90,7 +130,7 @@ public class JwtTokenService {
      * Description      :   refresh_token 생성
      * 
      ******************************************************************************************/
-    private String createRefreshToken() throws Exception {
+    private String createRefreshToken(CustomMap claim) throws Exception {
         SecretKey key = Keys.hmacShaKeyFor(JWT_TOKEN_SECRET.getBytes(StandardCharsets.UTF_8));
 
         long nowMillis = System.currentTimeMillis();
@@ -101,6 +141,7 @@ public class JwtTokenService {
                 .setIssuer(JWT_ISSUER)
                 .setIssuedAt(now)
                 .setExpiration(exp)
+                .setClaims(claim)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -117,9 +158,13 @@ public class JwtTokenService {
      * Description      :   토큰 유효성 검증
      * 
      ******************************************************************************************/
-    public Boolean verifyToken(String token) throws Exception {
-
-        return true;
+    public Boolean verifyToken(String token) {
+        try {
+            Jwts.parser().setSigningKey(JWT_TOKEN_SECRET.getBytes(StandardCharsets.UTF_8)).parseClaimsJws(token);
+            return true;
+        } catch (JwtException e) {
+            return false;
+        }
     }
 
 
@@ -139,5 +184,72 @@ public class JwtTokenService {
     public CustomMap tokenParser(String token) throws Exception {
 
         return new CustomMap();
+    }
+
+
+
+
+    /* ****************************************************************************************
+     * Title            :   토큰에서 ID 추출
+     * Scope            :   public
+     * Function Name    :   getIdFromToken                                                    
+     * ----------------------------------------------------------------------------------------
+     * Description      :   토큰에서 사용자 ID 추출
+     * 
+     ******************************************************************************************/
+    public Integer getIdFromToken(String token) throws Exception {
+        try {
+            return Jwts.parser()
+                    .setSigningKey(JWT_TOKEN_SECRET.getBytes(StandardCharsets.UTF_8))
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .get("id", Integer.class);
+        } catch (JwtException e) {
+            throw new Exception("Invalid token");
+        }
+    }
+
+
+    /* ****************************************************************************************
+     * Title            :   사용자 ID 기준으로 Access Token 생성
+     * Scope            :   public
+     * Function Name    :   createAccessTokenById                                                    
+     * ----------------------------------------------------------------------------------------
+     * Description      :   사용자 ID 기준으로 Access Token 생성
+     * 
+     ******************************************************************************************/
+    public String createAccessTokenByRefreshToken(String refreshToken) throws Exception {
+
+        int id = getIdFromToken(refreshToken);
+        if(id == 0) {
+            throw new Exception("Invalid token");
+        }
+
+        CustomMap claim = new CustomMap();
+        claim.put("id", id);
+
+        User user = getUserInfo(id);
+        if(user != null) {
+            claim.put("userId", user.getUserId());
+            claim.put("provider", user.getProvider());
+            claim.put("username", user.getUserName());
+            return createAccessToken(claim);
+        } else {
+            throw new Exception("User not found");
+        }
+    }
+
+
+
+    /* ****************************************************************************************
+     * Title            :   사용자 id값 기준으로 사용자 정보 가져오기
+     * Scope            :   private
+     * Function Name    :   getUserInfo                                                    
+     * ----------------------------------------------------------------------------------------
+     * Description      :   사용자 id값 기준으로 사용자 정보 가져오기
+     * 
+     ******************************************************************************************/
+    private User getUserInfo(int id) throws Exception {
+        return userService.getUserByIdAndDeletedAtIsNull(id);
     }
 }

@@ -30,6 +30,17 @@ public class KakaoLoginController {
     @Autowired
     JwtTokenService jwtTokenService;
 
+
+
+
+    /* ****************************************************************************************
+     * Title            :   카카오 SSO 로그인 후, 쿠키에 JWT 토큰 저장
+     * Method           :   POST
+     * Function Name    :   KakaoOauthLogin                                                    
+     * ----------------------------------------------------------------------------------------
+     * Description      :   Kakao OAuth 인증을 통해 로그인 처리 프로세스,
+     * 
+     ******************************************************************************************/
     @PostMapping("/kakao")
     public ResponseEntity<CustomMap> KakaoOauthLogin(@RequestBody CustomMap param, HttpServletRequest request) {
         CustomMap rtnMap = new CustomMap();
@@ -60,9 +71,6 @@ public class KakaoLoginController {
                     headers.add(HttpHeaders.SET_COOKIE, accessCookie.toString());
                     headers.add(HttpHeaders.SET_COOKIE, refreshCookie.toString());
 
-            // 4️⃣ Redirect 설정
-            // headers.add(HttpHeaders.LOCATION, "http://localhost:3002"); // 리디렉션할 URL
-            System.out.println("headers : "+headers);
             return new ResponseEntity<>(null, headers, HttpStatus.OK);
 
         } catch(ThrowCustomMapException e) {
@@ -73,4 +81,5 @@ public class KakaoLoginController {
 
         return new ResponseEntity<>(rtnMap, HttpStatus.OK);
     }
+
 }

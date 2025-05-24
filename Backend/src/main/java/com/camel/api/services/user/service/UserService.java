@@ -17,6 +17,16 @@ public class UserService {
     }
 
     public void saveUser(CustomMap user) throws Exception {
-        userRepository.save(new User(user));
+        User newUser = new User();
+        newUser.setUserName(user.getString("userName"));
+        newUser.setUserId(user.getString("userId"));
+        newUser.setProvider(user.getString("provider"));
+        newUser.setCreatedAt(new java.util.Date());
+
+        userRepository.save(newUser);
+    }
+
+    public User getUserByIdAndDeletedAtIsNull(int id) throws Exception {
+        return userRepository.findByIdAndDeletedAtIsNull(id);
     }
 }

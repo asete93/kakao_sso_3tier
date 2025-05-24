@@ -67,18 +67,14 @@ public class KakaoLoginService {
 
         CustomMap tokenMap = new CustomMap();
         tokenMap.put("userId",userId);
+        tokenMap.put("userName",userName);
+        tokenMap.put("provider","KAKAO");
 
-        // Step 4. 없는 경우 회원가입 유도.
-        if(existUser == null){
-            tokenMap.put("provider","KAKAO");
-            tokenMap.put("needSignup",true);
-
-            resultMap = jwtTokenService.createJwtTokenMap(tokenMap);
-
-        // Step 5. 있는 경우 로그인 성공
-        } else {
-            resultMap = jwtTokenService.createJwtTokenMap(tokenMap);
+        // Step 4. 토큰 발급
+        if(existUser != null){
+            tokenMap.put("id",existUser.getId());
         }
+        resultMap = jwtTokenService.createJwtTokenMap(tokenMap);
 
         return resultMap;
     }

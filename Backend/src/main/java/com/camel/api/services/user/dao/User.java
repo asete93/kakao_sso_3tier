@@ -17,21 +17,6 @@ import lombok.Data;
 @Table(name = "USERS")
 @Data
 public class User {
-    public User(){}
-
-    public User(CustomMap user) {
-        ObjectMapper mapper = new ObjectMapper();
-        User converted = mapper.convertValue(user, User.class);
-
-        this.id = converted.id;
-        this.userName = converted.userName;
-        this.userId = converted.userId;
-        this.provider = converted.provider;
-        this.createdAt = converted.createdAt;
-        this.deletedAt = converted.deletedAt;
-    }
-
-
     @Id
     @Column(name = "ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)

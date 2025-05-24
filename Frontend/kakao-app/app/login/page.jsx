@@ -4,16 +4,21 @@ import * as Styled from "./page.styled";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 const Index = () => {
     const param = useSearchParams();
+    const router = useRouter();
 
     useEffect(() => {
         const code = param.get("code");
         if (code) {
             // 카카오 로그인 성공 후, 백엔드로 코드 전송
             axios.post(`/login/kakao`,{code:code}).then((response) => {
-                console.log("response : ",response)
+                if(response.status === 200) {
+                    // 로그인 성공 후, 메인 페이지로 이동
+                    router.push("/main");
+                }
             })
         }
     }, []);

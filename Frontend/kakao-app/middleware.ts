@@ -12,17 +12,17 @@ const protectedPath = ["/main"];
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // 이미 인증되어 있는데, 로그인 하려는 경우. Welcome 페이지로 튕김
-  if(pathname.startsWith('/login') && req.cookies.get('access_token')?.value){
-    return NextResponse.redirect(new URL('/welcome', req.url));
+  // 이미 인증되어 있는데, 로그인 하려는 경우. main 페이지로 튕김
+  if(pathname.startsWith('/login') && req.cookies.get('refresh_token')?.value){
+    return NextResponse.redirect(new URL('/main', req.url));
   }
 
   // 인증 안된 상태로 로그인 하려는 경우. 허용.
-  if(pathname.startsWith('/login') && !req.cookies.get('access_token')?.value){
+  if(pathname.startsWith('/login') && !req.cookies.get('refresh_token')?.value){
     return NextResponse.next();
   }
 
-  if(pathname=="/" && !req.cookies.get('access_token')?.value ){
+  if(pathname=="/" && !req.cookies.get('refresh_token')?.value ){
     return NextResponse.redirect(new URL('/login', req.url));
   }
 
@@ -34,8 +34,8 @@ export function middleware(req: NextRequest) {
   // 보호대상 아닌 경우, 인증 검증 X
   if (!isProjected) return NextResponse.next();
 
-  // 쿠키에서 access_token 추출.
-  const token = req.cookies.get('access_token')?.value;
+  // 쿠키에서 refresh_token 추출.
+  const token = req.cookies.get('refresh_token')?.value;
 
   // 인증이 필요하지만, 쿠키가 없을 경우.
   if (!token) {
