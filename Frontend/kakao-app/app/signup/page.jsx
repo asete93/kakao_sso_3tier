@@ -1,10 +1,17 @@
 "use client"
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import * as Styled from "./page.styled";
 import {toast} from "sonner";
 import commonAxios from "@/lib/Axios";
+import { useRouter } from "next/navigation";
 
 const Index = () => {
+    const router = useRouter();
+
+    useEffect(() => {
+        handleAllChange();
+    }, []);
+
     const [checks, setChecks] = useState({
         all: false,
         age: false,
@@ -31,8 +38,13 @@ const Index = () => {
         setChecks(newChecks);
     };
 
-    const signup = async () => {
-        await commonAxios.post("/api/v1/user/signup")
+    const signup = () => {
+        commonAxios.post("/api/v1/user/signup").then(() => {
+            router.push("/signup/success");
+        }).catch((error) => {
+            console.error("회원가입 오류:", error);
+            toast.error("회원가입 중 오류가 발생했습니다. 다시 시도해주세요.");
+        });
     }
 
     return (

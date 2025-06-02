@@ -69,7 +69,7 @@ public class JwtTokenService {
             claim.put("userId", user.getUserId());
             claim.put("id", user.getId());
             claim.put("provider", user.getProvider());
-            claim.put("username", user.getUserName());
+            claim.put("userName", user.getUserName());
         }
 
         tokenMap.put("access_token",createAccessToken(claim));
@@ -92,11 +92,17 @@ public class JwtTokenService {
     private String createAccessToken(CustomMap claim) throws Exception {
         SecretKey key = Keys.hmacShaKeyFor(JWT_TOKEN_SECRET.getBytes(StandardCharsets.UTF_8));
 
+        String userName = "";
+        if( claim.containsKey("userName") ) {
+            userName = claim.getString("userName");
+        }
+
         long nowMillis = System.currentTimeMillis();
         Date now = new Date(nowMillis);
         Date exp = new Date(nowMillis + ACCESS_TOKEN_TIME);
 
         return Jwts.builder()
+                .setSubject(userName)
                 .setIssuer(JWT_ISSUER)
                 .setIssuedAt(now)
                 .setExpiration(exp)
@@ -117,13 +123,13 @@ public class JwtTokenService {
      * 
      ******************************************************************************************/
     private String createRefreshToken(CustomMap claim) throws Exception {
-        claim.put("test","1");
-
         SecretKey key = Keys.hmacShaKeyFor(JWT_TOKEN_SECRET.getBytes(StandardCharsets.UTF_8));
 
         long nowMillis = System.currentTimeMillis();
         Date now = new Date(nowMillis);
         Date exp = new Date(nowMillis + REFRESH_TOKEN_TIME);
+
+        claim.put("type","refresh");
 
         return Jwts.builder()
                 .setIssuer(JWT_ISSUER)
@@ -235,7 +241,7 @@ public class JwtTokenService {
         if(user != null) {
             claim.put("userId", user.getUserId());
             claim.put("provider", user.getProvider());
-            claim.put("username", user.getUserName());
+            claim.put("userName", user.getUserName());
             return createAccessToken(claim);
         } else {
             throw new Exception("User not found");

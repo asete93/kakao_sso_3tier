@@ -1,17 +1,54 @@
 import styled from "styled-components";
 
 export const SLayout = styled.div`
-  width: 100vw;
-  height: 100vh;
   display: flex;
+  flex-direction: column;
+`
+
+export const SHeaderDiv = styled.div`
+  height: 40px;
+  display: flex;
+  background-color: #134A8F;
+  justify-content: end;
+  align-items: center;
+`
+
+export const SUserNameDiv = styled.div`
+  margin-right: 10px;
+  color: white;
+`
+
+export const SUserIconDiv = styled.div`
+  color: #ffffff;
+  height: 60%;
+  display: flex;
+  align-items: center;
   justify-content: center;
-  overflow: auto;
+  font-size: 9pt;
+  font-weight: 600;
+  background-color: #ffffff;
+  padding: 5px;
+  border-radius: 20px;
+`
+
+export const SLogoutDiv = styled.div`
+  margin-left: 20px;
+  color: #ffffff;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  margin-right: 20px;
+  cursor: pointer;
+  transition: 0.1s;
+
+  &:hover {
+    color: #e4e2fd;
+  }
 `
 
 export const SContentsDiv = styled.div`
-  min-width: 90vw;
-  min-height: 300px;
-  background-color: #e4e4fa;
+  width: 100%;
+  min-height: calc(100vh - 40px);
   padding: 30px;
 `
 
@@ -19,19 +56,3 @@ export const SContentsDiv = styled.div`
 export const SUserInfoDiv = styled.div`
   display: flex;
 `
-
-export const SLogoutDiv = styled.div`
-  margin-left: auto;
-  flex-flow: 1;
-  display: flex;
-  align-items:center;
-  color: #461cee;
-  transition: 0.1s;
-  cursor: pointer;
-
-  &:hover {
-    text-decoration: underline;
-    color: #7657f1;
-  }
-`
-

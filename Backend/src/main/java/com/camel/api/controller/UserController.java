@@ -1,5 +1,8 @@
 package com.camel.api.controller;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -49,9 +52,18 @@ public class UserController {
                 .sameSite("Lax")
                 .build();
 
+         ResponseCookie userNameCookie = ResponseCookie.from("_xjd", "")
+                .httpOnly(true)
+                .secure(request.isSecure())
+                .path("/")
+                .maxAge(0)
+                .sameSite("Lax")
+                .build();
+
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.SET_COOKIE, accessCookie.toString());
         headers.add(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+        headers.add(HttpHeaders.SET_COOKIE, userNameCookie.toString());
 
         return new ResponseEntity<>(null, headers, HttpStatus.NO_CONTENT);
     }
@@ -77,7 +89,7 @@ public class UserController {
             tokenMap = jwtTokenService.tokenParser(token);
             User savedUser = userService.saveUser(tokenMap);
 
-            // 3. token Update
+            // 3. token 재할당
             tokenMap.put("id", savedUser.getId());
             updatedTokenMap = jwtTokenService.createJwtTokenMap(tokenMap);
 
@@ -100,23 +112,37 @@ public class UserController {
                     .sameSite("Lax")
                     .build();
 
+            String username = jwtTokenService.tokenParser(refresh_token).getString("userName");
+            String encodedUsername = Base64.getEncoder().encodeToString(username.getBytes(StandardCharsets.UTF_8));
+
+            ResponseCookie userNameCookie = ResponseCookie.from("_xjd", encodedUsername)
+                .httpOnly(true)
+                .secure(request.isSecure())
+                .path("/")
+                .maxAge(jwtTokenService.REFRESH_TOKEN_TIME)
+                .sameSite("Lax")
+                .build();
+
             HttpHeaders headers = new HttpHeaders();
             headers.add(HttpHeaders.SET_COOKIE, accessCookie.toString());
             headers.add(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+            headers.add(HttpHeaders.SET_COOKIE, userNameCookie.toString());
 
             updatedTokenMap.remove("access_token");
             updatedTokenMap.remove("refresh_token");
 
+            updatedTokenMap.put("userName", savedUser.getUserName());
+
             return new ResponseEntity<>(updatedTokenMap, headers, HttpStatus.OK);
 
         } catch(ThrowCustomMapException e) {
-            return new ResponseEntity<>(e.getResponse(), HttpStatus.OK);
+            return new ResponseEntity<>(e.getResponse(), HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (Exception e) {
             e.printStackTrace();
             CustomMap errMap = new CustomMap();
             errMap.put("error_message",e.getMessage());
             errMap.put("status",500);
-            return new ResponseEntity<>(errMap, HttpStatus.OK);
+            return new ResponseEntity<>(errMap, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

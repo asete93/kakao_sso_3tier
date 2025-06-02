@@ -4,9 +4,7 @@ import Image from "next/image";
 import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import commonAxios from "@/lib/Axios";
-import Cookies from 'js-cookie';
 
 
 const LoginKakao = () => {
@@ -26,14 +24,8 @@ const LoginKakao = () => {
                     if (response?.data?.needSignup) {
                         router.push("/signup");
                         return
-                    } else {
-                        Cookies.set("loginUser", response?.data?.userName, {
-                            expires: 1, // 1일 후 만료
-                            path: "/",  // 전체 경로에서 유효
-                            secure: true, // HTTPS 환경에서만 전송
-                            sameSite: "Lax"
-                        });
                     }
+                    
                     router.push("/");
                 }
             })
@@ -44,6 +36,7 @@ const LoginKakao = () => {
     const handleClick = () => {
         const REDIRECT_URI = `http://100.68.107.86:3002/login?type=kakao`;
         const KAKAO_REST_API_KEY = process.env.NEXT_PUBLIC_KAKAO_REST_KEY;
+        // const kakaoRedirectUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${KAKAO_REST_API_KEY}&redirect_uri=${REDIRECT_URI}&prompt=login`;
         const kakaoRedirectUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${KAKAO_REST_API_KEY}&redirect_uri=${REDIRECT_URI}`;
         window.location.href = kakaoRedirectUrl;
     }

@@ -1,13 +1,12 @@
 "use client"
 import * as Styled from "./page.styled";
-import {toast} from "sonner";
 import { CiCircleCheck } from "react-icons/ci";
 import { useRouter } from "next/navigation";
 
 const Index = () => {
     const router = useRouter();
 
-    const signup = async () => {
+    const ok = async () => {
         router.push("/");
     }
 
@@ -24,7 +23,7 @@ const Index = () => {
                     회원가입이 완료되었습니다.
                 </Styled.STextDiv>
 
-                <Styled.SSignupButton onClick={signup}>
+                <Styled.SSignupButton onClick={ok}>
                     확인
                 </Styled.SSignupButton>
             </Styled.SContentsDiv>

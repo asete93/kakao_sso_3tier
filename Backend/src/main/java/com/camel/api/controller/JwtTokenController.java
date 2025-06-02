@@ -1,5 +1,8 @@
 package com.camel.api.controller;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -48,6 +51,22 @@ public class JwtTokenController {
 
             HttpHeaders headers = new HttpHeaders();
             headers.add(HttpHeaders.SET_COOKIE, accessCookie.toString());
+
+            if(jwtTokenService.getIdFromToken(refreshToken) != null && jwtTokenService.getIdFromToken(refreshToken) > 0) {
+                // Refresh Token이 유효한 경우, 사용자 정보를 가져와 쿠키에 저장
+                String username = jwtTokenService.tokenParser(refreshToken).getString("userName");
+                String encodedUsername = Base64.getEncoder().encodeToString(username.getBytes(StandardCharsets.UTF_8));
+
+                ResponseCookie userNameCookie = ResponseCookie.from("_xjd", encodedUsername)
+                    .httpOnly(true)
+                    .secure(request.isSecure())
+                    .path("/")
+                    .maxAge(jwtTokenService.REFRESH_TOKEN_TIME)
+                    .sameSite("Lax")
+                    .build();
+
+                headers.add(HttpHeaders.SET_COOKIE, userNameCookie.toString());
+            }
 
             return new ResponseEntity<>(null, headers, HttpStatus.OK);
         } catch (Exception e) {
