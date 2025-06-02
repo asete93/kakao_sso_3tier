@@ -4,8 +4,10 @@ import Image from "next/image";
 import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
-import {toast} from "sonner";
+import { toast } from "sonner";
 import commonAxios from "@/lib/Axios";
+import Cookies from 'js-cookie';
+
 
 const LoginKakao = () => {
     const param = useSearchParams();
@@ -17,9 +19,21 @@ const LoginKakao = () => {
 
         if (code && type && type == "kakao") {
             // 카카오 로그인 성공 후, 백엔드로 코드 전송
-            commonAxios.post(`/login/kakao`,{code:code}).then((response) => {
-                if(response.status === 200) {
+            commonAxios.post(`/login/kakao`, { code: code }).then((response) => {
+                if (response.status === 200) {
                     // 로그인 성공 후, 메인 페이지로 이동
+
+                    if (response?.data?.needSignup) {
+                        router.push("/signup");
+                        return
+                    } else {
+                        Cookies.set("loginUser", response?.data?.userName, {
+                            expires: 1, // 1일 후 만료
+                            path: "/",  // 전체 경로에서 유효
+                            secure: true, // HTTPS 환경에서만 전송
+                            sameSite: "Lax"
+                        });
+                    }
                     router.push("/");
                 }
             })
@@ -34,7 +48,7 @@ const LoginKakao = () => {
         window.location.href = kakaoRedirectUrl;
     }
 
-    return(
+    return (
         <Styled.SLayout onClick={handleClick}>
             <Image alt="Kakao Icon" src="/assets/login/kakao.webp" width={20} height={20} />
             Sign in with Kakao

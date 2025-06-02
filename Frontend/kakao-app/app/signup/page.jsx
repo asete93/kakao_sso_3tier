@@ -2,6 +2,7 @@
 import { useState } from "react";
 import * as Styled from "./page.styled";
 import {toast} from "sonner";
+import commonAxios from "@/lib/Axios";
 
 const Index = () => {
     const [checks, setChecks] = useState({
@@ -31,7 +32,7 @@ const Index = () => {
     };
 
     const signup = async () => {
-        toast.success("SUCCESS")
+        await commonAxios.post("/api/v1/user/signup")
     }
 
     return (

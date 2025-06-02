@@ -18,6 +18,10 @@ const nextConfig = {
                 source: "/logout",
                 destination: `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/v1/user/logout`,
             },
+            {
+                source: "/api/v1/user/signup",
+                destination: `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/v1/user/signup`,
+            },
         ];
     },
     // Styled 렌더링 이슈 해소하기 위함.

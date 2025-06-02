@@ -10,7 +10,7 @@ const Login = () => {
 
     return(
     <Styled.SLayout>
-        <Styled.SInputBox type="text" placeholder="Enter Your Email..." />
+        <Styled.SInputBox type="email" placeholder="Enter Your Email..." />
         <Styled.SSingupButton onClick={handleClick} >Sign in</Styled.SSingupButton>
     </Styled.SLayout>
     )

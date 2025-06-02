@@ -16,14 +16,14 @@ public class UserService {
         return userRepository.findByUserIdAndProviderAndDeletedAtIsNull(userId, provider);
     }
 
-    public void saveUser(CustomMap user) throws Exception {
+    public User saveUser(CustomMap user) throws Exception {
         User newUser = new User();
         newUser.setUserName(user.getString("userName"));
         newUser.setUserId(user.getString("userId"));
         newUser.setProvider(user.getString("provider"));
         newUser.setCreatedAt(new java.util.Date());
 
-        userRepository.save(newUser);
+        return userRepository.save(newUser);
     }
 
     public User getUserByIdAndDeletedAtIsNull(int id) throws Exception {

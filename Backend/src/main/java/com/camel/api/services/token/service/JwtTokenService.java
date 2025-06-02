@@ -2,6 +2,7 @@ package com.camel.api.services.token.service;
 
 import java.nio.charset.StandardCharsets;
 import java.sql.Date;
+import java.util.Map;
 
 import javax.crypto.SecretKey;
 
@@ -14,10 +15,12 @@ import com.camel.api.services.user.service.UserService;
 import com.camel.common.CommonUtils;
 import com.camel.common.CustomMap;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 
 @Service
 public class JwtTokenService {
@@ -114,6 +117,8 @@ public class JwtTokenService {
      * 
      ******************************************************************************************/
     private String createRefreshToken(CustomMap claim) throws Exception {
+        claim.put("test","1");
+
         SecretKey key = Keys.hmacShaKeyFor(JWT_TOKEN_SECRET.getBytes(StandardCharsets.UTF_8));
 
         long nowMillis = System.currentTimeMillis();
@@ -165,8 +170,23 @@ public class JwtTokenService {
      * 
      ******************************************************************************************/
     public CustomMap tokenParser(String token) throws Exception {
+        CustomMap map = new CustomMap();
+        try {
+            Claims claims = Jwts.parser()
+                    .setSigningKey(JWT_TOKEN_SECRET.getBytes("UTF-8"))
+                    .parseClaimsJws(token)
+                    .getBody();
 
-        return new CustomMap();
+            for (Map.Entry<String, Object> entry : claims.entrySet()) {
+                map.put(entry.getKey(), entry.getValue());
+            }
+        } catch (SignatureException e) {
+            throw new Exception("Invalid JWT signature", e);
+        } catch (Exception e) {
+            throw new Exception("JWT 파싱 실패", e);
+        }
+
+        return map;
     }
 
 

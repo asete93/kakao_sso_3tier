@@ -53,8 +53,8 @@ public class JwtAuthFilter extends OncePerRequestFilter{
 
         // 3. 검증 성공 시, 요청에 사용자 정보 추가
         try {
-            int id = jwtTokenService.getIdFromToken(token);
-            if (id > 0) {
+            Integer id = jwtTokenService.getIdFromToken(token);
+            if (id != null && id > 0) {
                 request.setAttribute("id", id);
             }
         } catch (Exception e) {

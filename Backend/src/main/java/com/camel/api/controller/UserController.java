@@ -11,20 +11,25 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.camel.api.services.token.service.JwtTokenService;
+import com.camel.api.services.user.dao.User;
 import com.camel.api.services.user.service.UserService;
 import com.camel.common.CustomMap;
+import com.camel.common.cusotmException.ThrowCustomMapException;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/v1/user")
 @CrossOrigin
 public class UserController {
-    
 
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private JwtTokenService jwtTokenService;
 
     @PostMapping("/logout")
     public ResponseEntity<CustomMap> logout(HttpServletRequest request) {
@@ -50,7 +55,70 @@ public class UserController {
 
         return new ResponseEntity<>(null, headers, HttpStatus.NO_CONTENT);
     }
-    
+
+    @PostMapping("/signup")
+    public ResponseEntity<CustomMap> signup(HttpServletRequest request) {
+        CustomMap updatedTokenMap = null;
+        try {
+            CustomMap tokenMap = null;
+            String token = "";
+
+            // 1. access_token 쿠키에서 추출
+            if (request.getCookies() != null) {
+                for (Cookie cookie : request.getCookies()) {
+                    if ("access_token".equals(cookie.getName())) {
+                        token = cookie.getValue();
+                        break;
+                    }
+                }
+            }
+
+            // 2. access_token 쿠키값 기준으로 User 정보 획득하고, 해당 값으로 회원등록
+            tokenMap = jwtTokenService.tokenParser(token);
+            User savedUser = userService.saveUser(tokenMap);
+
+            // 3. token Update
+            tokenMap.put("id", savedUser.getId());
+            updatedTokenMap = jwtTokenService.createJwtTokenMap(tokenMap);
+
+            String access_token = updatedTokenMap.getString("access_token");
+            String refresh_token = updatedTokenMap.getString("refresh_token");
+
+            ResponseCookie accessCookie = ResponseCookie.from("access_token", access_token)
+                    .httpOnly(true)
+                    .secure(request.isSecure())
+                    .path("/")
+                    .maxAge(jwtTokenService.ACCESS_TOKEN_TIME)
+                    .sameSite("Lax")
+                    .build();
+
+            ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refresh_token)
+                    .httpOnly(true)
+                    .secure(request.isSecure())
+                    .path("/")
+                    .maxAge(jwtTokenService.REFRESH_TOKEN_TIME)
+                    .sameSite("Lax")
+                    .build();
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.SET_COOKIE, accessCookie.toString());
+            headers.add(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+
+            updatedTokenMap.remove("access_token");
+            updatedTokenMap.remove("refresh_token");
+
+            return new ResponseEntity<>(updatedTokenMap, headers, HttpStatus.OK);
+
+        } catch(ThrowCustomMapException e) {
+            return new ResponseEntity<>(e.getResponse(), HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            CustomMap errMap = new CustomMap();
+            errMap.put("error_message",e.getMessage());
+            errMap.put("status",500);
+            return new ResponseEntity<>(errMap, HttpStatus.OK);
+        }
+    }
 
 
     @GetMapping("/me")
@@ -83,5 +151,5 @@ public class UserController {
 
         return new ResponseEntity<>(userMap, HttpStatus.OK);
     }
-    
+
 }
