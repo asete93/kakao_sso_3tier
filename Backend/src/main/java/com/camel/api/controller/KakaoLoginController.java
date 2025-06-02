@@ -71,7 +71,10 @@ public class KakaoLoginController {
                     headers.add(HttpHeaders.SET_COOKIE, accessCookie.toString());
                     headers.add(HttpHeaders.SET_COOKIE, refreshCookie.toString());
 
-            return new ResponseEntity<>(null, headers, HttpStatus.OK);
+            rtnMap.remove("access_token");
+            rtnMap.remove("refresh_token");
+
+            return new ResponseEntity<>(rtnMap, headers, HttpStatus.OK);
 
         } catch(ThrowCustomMapException e) {
             return new ResponseEntity<>(e.getResponse(), HttpStatus.OK);

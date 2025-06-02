@@ -1,9 +1,9 @@
 "use client"
-import commonAxios from "../lib/Axios";
-import * as Styled from "./page.styled";
 import { useEffect, useState } from "react";
+import * as Styled from "./UserInfo.styled";
+import commonAxios from "@/lib/Axios";
 
-const Index = () => {
+const UserInfo = () => {
     const [data, setData] = useState(null);
 
     useEffect(()=>{
@@ -21,14 +21,11 @@ const Index = () => {
         }
     }
 
-    
     return (
-        <Styled.SLayoutDiv>
-            <Styled.SContentsDiv>
-                {data}
-            </Styled.SContentsDiv>
-        </Styled.SLayoutDiv>
+        <Styled.SLayout>
+            {data}
+        </Styled.SLayout>
     )
 }
 
-export default Index;
+export default UserInfo;

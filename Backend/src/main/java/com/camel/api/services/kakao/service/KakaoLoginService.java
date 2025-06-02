@@ -74,7 +74,16 @@ public class KakaoLoginService {
         if(existUser != null){
             tokenMap.put("id",existUser.getId());
         }
+        
         resultMap = jwtTokenService.createJwtTokenMap(tokenMap);
+
+        // Step 5. User 정보 반환
+        if(existUser != null){
+            resultMap.put("userName",existUser.getUserName());
+        } else {
+            resultMap.put("needSignup",true);
+            resultMap.put("userName",userName);
+        }
 
         return resultMap;
     }

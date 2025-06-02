@@ -3,18 +3,15 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export const config = {
-    matcher: ['/:path*'], // 감시할 경로 패턴
+    matcher: ['/((?!_next/static|_next/image|favicon.ico|assets|fonts|images|api).*)'], // 감시할 경로 패턴
 }
-
-// 보호대상
-const protectedPath = ["/main"];
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   // 이미 인증되어 있는데, 로그인 하려는 경우. main 페이지로 튕김
   if(pathname.startsWith('/login') && req.cookies.get('refresh_token')?.value){
-    return NextResponse.redirect(new URL('/main', req.url));
+    return NextResponse.redirect(new URL('/', req.url));
   }
 
   // 인증 안된 상태로 로그인 하려는 경우. 허용.
@@ -26,16 +23,10 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL('/login', req.url));
   }
 
-  // 보호 대상인지 판별
-  const isProjected = protectedPath.some((path) =>
-    pathname.startsWith(path)
-  );
-
-  // 보호대상 아닌 경우, 인증 검증 X
-  if (!isProjected) return NextResponse.next();
-
   // 쿠키에서 refresh_token 추출.
   const token = req.cookies.get('refresh_token')?.value;
+
+  if(pathname)
 
   // 인증이 필요하지만, 쿠키가 없을 경우.
   if (!token) {

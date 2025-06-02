@@ -177,4 +177,13 @@ public class CommonUtils {
     public static String makeBearerTokenFormat(String token){
         return String.format("Bearer %s", token);
     }
+
+
+    public static Boolean checkParam(CustomMap param, String key){
+        if(param == null) return false;
+        
+        if(!param.containsKey(key)) return false;
+
+        return true;
+    }
  }

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.camel.api.services.user.dao.User;
 import com.camel.api.services.user.service.UserService;
+import com.camel.common.CommonUtils;
 import com.camel.common.CustomMap;
 
 import io.jsonwebtoken.JwtException;
@@ -40,7 +41,6 @@ public class JwtTokenService {
     public static Integer REFRESH_TOKEN_TIME = ONE_HOUR * 24;
 
 
-
     /* ****************************************************************************************
      * Title            :   JWT Token Map 생성
      * Scope            :   public
@@ -53,38 +53,21 @@ public class JwtTokenService {
         CustomMap tokenMap = new CustomMap();
         CustomMap claim = new CustomMap();
 
-        // ID 없는 경우, 회원가입 유도
-        if(param == null || !param.containsKey("id")) {
-            claim.put("needSignup", true);
-            
-            if(param != null && param.containsKey("userId")) {
-                claim.put("userId", param.getString("userId"));
-            }
-            if(param != null && param.containsKey("provider")) {
-                claim.put("provider", param.getString("provider"));
-            }
-            if(param != null && param.containsKey("userName")) {
-                claim.put("userName", param.getString("userName"));
-            }
+        // 기존 회원이 아닌경우
+        if( !CommonUtils.checkParam(param, "id") ) {
+            claim.put("userId", param.getString("userId"));
+            claim.put("provider", param.getString("provider"));
+            claim.put("userName", param.getString("userName"));
 
-        // ID 있는 경우, 사용자 정보 가져오기
+        // 기존 회원 정보가 있는 경우, 사용자 정보 가져오기
         } else {
             User user = getUserInfo(param.getInt("id"));
 
-            // 사용자 정보가 없을 경우, 회원가입 유도
-            if(user == null) {
-                claim.put("needSignup", true);
-
-            // 사용자 정보 있을 경우, Calim 설정
-            } else {
-                claim.put("userId", user.getUserId());
-                claim.put("id", user.getId());
-                claim.put("provider", user.getProvider());
-                claim.put("username", user.getUserName());
-                claim.put("needSignup", false);
-            }
+            claim.put("userId", user.getUserId());
+            claim.put("id", user.getId());
+            claim.put("provider", user.getProvider());
+            claim.put("username", user.getUserName());
         }
-        
 
         tokenMap.put("access_token",createAccessToken(claim));
         tokenMap.put("refresh_token",createRefreshToken(claim));

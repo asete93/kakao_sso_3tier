@@ -49,9 +49,9 @@ commonAxios.interceptors.response.use(
 
         return commonAxios(originalRequest); // 재요청
       } catch (err) {
+        await axios.post("/logout");
         isRefreshing = false;
-        console.error('Token refresh failed', err);
-        // 로그아웃 처리 등
+        location.href = "/login";
         return Promise.reject(err);
       }
     }

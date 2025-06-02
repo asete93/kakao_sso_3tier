@@ -2,7 +2,6 @@ package com.camel.filter;
 
 import java.io.IOException;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -25,6 +24,14 @@ public class JwtAuthFilter extends OncePerRequestFilter{
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String token = null;
+
+        String path = request.getRequestURI();
+
+        // logout은 필터에서 제외
+        if (path.equals("/api/v1/user/logout")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
         
         // 1. access_token 쿠키에서 추출
         if (request.getCookies() != null) {
