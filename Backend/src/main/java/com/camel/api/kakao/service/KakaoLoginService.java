@@ -1,4 +1,4 @@
-package com.camel.api.services.kakao.service;
+package com.camel.api.kakao.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -6,9 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.camel.api.services.token.service.JwtTokenService;
-import com.camel.api.services.user.dao.User;
-import com.camel.api.services.user.service.UserService;
+import com.camel.api.token.service.JwtTokenService;
+import com.camel.api.user.model.User;
+import com.camel.api.user.service.UserService;
 import com.camel.common.ApiClient;
 import com.camel.common.CommonUtils;
 import com.camel.common.CustomMap;

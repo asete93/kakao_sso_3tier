@@ -1,10 +1,10 @@
-package com.camel.api.services.user.service;
+package com.camel.api.user.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.camel.api.services.user.dao.User;
-import com.camel.api.services.user.repository.UserRepository;
+import com.camel.api.user.model.User;
+import com.camel.api.user.repository.UserRepository;
 import com.camel.common.CustomMap;
 
 @Service

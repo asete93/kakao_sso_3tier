@@ -19,7 +19,7 @@ import jakarta.persistence.EntityManagerFactory;
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(
-        basePackages = "com.camel.api.services.user.repository",
+        basePackages = "com.camel.api.user.repository",
         entityManagerFactoryRef = "camelEntityManagerFactory",
         transactionManagerRef = "camelTransactionManager"
 )
@@ -36,7 +36,7 @@ public class CamelDatasourceConfig {
             @Qualifier("camelDataSource") DataSource dataSource) {
         return builder
                 .dataSource(dataSource)
-                .packages("com.camel.api.services.user.dao")
+                .packages("com.camel.api.user.model")
                 .persistenceUnit("camel")
                 .build();
     }

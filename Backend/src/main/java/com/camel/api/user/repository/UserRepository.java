@@ -1,9 +1,9 @@
-package com.camel.api.services.user.repository;
+package com.camel.api.user.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.camel.api.services.user.dao.User;
+import com.camel.api.user.model.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {

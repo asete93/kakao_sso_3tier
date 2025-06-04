@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.camel.api.services.token.service.JwtTokenService;
+import com.camel.api.token.service.JwtTokenService;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

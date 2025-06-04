@@ -1,9 +1,6 @@
-package com.camel.api.services.user.dao;
+package com.camel.api.user.model;
 
 import java.util.Date;
-
-import com.camel.common.CustomMap;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
