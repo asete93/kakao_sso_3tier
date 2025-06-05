@@ -14,6 +14,7 @@ import lombok.Data;
 @Table(name = "USERS")
 @Data
 public class User {
+    // 본 서비스에서 사용자를 구분하는 유일한 식별자
     @Id
     @Column(name = "ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,6 +23,7 @@ public class User {
     @Column(name = "USERNAME")
     private String userName;
 
+    // SSO 로그인할 경우, IdP에서 제공하는 사용자 ID값
     @Column(name = "USER_ID")
     private String userId;
 

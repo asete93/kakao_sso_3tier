@@ -2,10 +2,9 @@ version: '3.4'
 services:
   mysql:
     container_name: kakaologin-db
-    image: mysql:9.2
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile_DB
+    build:
+      context: .
+      dockerfile: Dockerfiles/Dockerfile_DB
     volumes:
       - ./Database/data/db/conf.d:/etc/mysql/conf.d
       - ./Database/data/db/data:/var/lib/mysql
@@ -18,3 +17,15 @@ services:
       - MYSQL_PASSWORD=Zmffkdnem12
       - MYSQL_DATABASE=kakao
     mem_limit: 4096M
+
+  backend:
+    container_name: kakaologin-backend
+    build:
+      context: .
+      dockerfile: Dockerfiles/Dockerfile_Backend_With_Proxy
+      args:
+        PROXY_ADDR: "http://192.168.0.73:8888"
+    depends_on: ["mysql"]
+    ports:
+      - 8083:8083
+    restart: always

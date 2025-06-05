@@ -43,7 +43,11 @@ public class ApiClient {
     }
 
 
-    // Get
+    /*
+    * ****************************************************************************************
+    * GET Client
+    *
+    ******************************************************************************************/
     public CustomMap getClient(String url) throws Exception {
         try(CloseableHttpClient client = createClient()){
             return getClient(client, url, null); // Call Overloaded Method
@@ -78,7 +82,11 @@ public class ApiClient {
     }
 
 
-    // Post
+    /*
+    * ****************************************************************************************
+    * POST Client
+    *
+    ******************************************************************************************/
     public CustomMap postClient(String url, CustomMap param) throws Exception {
         try(CloseableHttpClient client = createClient()){
             return postClient(client, url, param, null);  // Call Overloaded Method
@@ -119,7 +127,11 @@ public class ApiClient {
     }
 
 
-    // Put
+    /*
+    * ****************************************************************************************
+    * PUT Client
+    *
+    ******************************************************************************************/
     public CustomMap putClient(String url, CustomMap param) throws Exception {
         try(CloseableHttpClient client = createClient()){
             return putClient(client, url, param, null);  // Call Overloaded Method
@@ -162,7 +174,11 @@ public class ApiClient {
 
 
 
-    // Delete
+    /*
+    * ****************************************************************************************
+    * DELETE Client
+    *
+    ******************************************************************************************/
     public CustomMap deleteClient(String url) throws Exception {
         try(CloseableHttpClient client = createClient()){
             return deleteClient(client, url, null);  // Call Overloaded Method
@@ -200,7 +216,16 @@ public class ApiClient {
 
 
 
-    // 기본 헤더 생성
+    /*
+     * ****************************************************************************************
+     * Title : 기본헤더 생성
+     * Scope : private
+     * Function Name : createDefaultHeader
+     * ----------------------------------------------------------------------------------------
+     * Description : GET방식을 제외한 나머지 방식의 Client에 대해, 따로 header를 지정하지 않았다면,
+     * application/json 헤더를 기본으로 지정한다.
+     * 
+     ******************************************************************************************/
     private CustomMap createDefaultHeader(CustomMap headers, String type) throws Exception {
         if(headers == null) {
             CustomMap headersMap = new CustomMap();
@@ -219,7 +244,15 @@ public class ApiClient {
         }
     }
 
-    // 결과 파싱
+    /*
+     * ****************************************************************************************
+     * Title : 응답 결과 파싱
+     * Scope : private
+     * Function Name : parseResponse
+     * ----------------------------------------------------------------------------------------
+     * Description : 응답결과를 파싱하여, CustomMap 객체로 반환
+     * 
+     ******************************************************************************************/
     private CustomMap parseResponse(CloseableHttpResponse response) throws Exception {
         CustomMap responseMap = new CustomMap();
 

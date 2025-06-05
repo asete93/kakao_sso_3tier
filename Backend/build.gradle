@@ -71,7 +71,20 @@ tasks.named('test') {
 }
 
 bootRun {
-    systemProperty 'server.port', '8084'
+	def proxyAddr = System.getenv("PROXY_ADDR")
+	if (proxyAddr) {
+		def host = proxyAddr.replace("http://", "").split(":")[0]
+        def port = proxyAddr.replace("http://", "").split(":")[1]
+        
+        systemProperty 'http.proxyHost', host
+        systemProperty 'http.proxyPort', port
+        systemProperty 'https.proxyHost', host
+        systemProperty 'https.proxyPort', port
+
+		println "Using proxy: ${host}:${port}"
+	}
+
+    systemProperty 'server.port', '8083'
 	systemProperty 'spring.devtools.restart.enabled', 'false' // 선택 사항: Hot swapping 비활성화
     systemProperty 'spring.output.ansi.enabled', 'ALWAYS'
     jvmArgs = [

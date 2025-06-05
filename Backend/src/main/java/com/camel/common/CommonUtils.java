@@ -2,7 +2,6 @@ package com.camel.common;
 
 import java.io.IOException;
 import java.security.SecureRandom;
-import java.sql.Timestamp;
 import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -15,10 +14,20 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+
 public class CommonUtils {
 
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
+    /*
+     * ****************************************************************************************
+     * Title : 랜덤 글자 생성
+     * Scope : private
+     * Function Name : generateRandomString
+     * ----------------------------------------------------------------------------------------
+     * Description : CHARACTERS 범위 내의 문자를 기반으로, 요청한 길이의 랜덤 문자열을 생성한다.
+     * 
+     ******************************************************************************************/
     public static String generateRandomString(int length) {
         SecureRandom random = new SecureRandom();
         StringBuilder sb = new StringBuilder(length);
@@ -31,34 +40,36 @@ public class CommonUtils {
         return sb.toString();
     }
 
+    /*
+     * ****************************************************************************************
+     * Title : Json -> Map
+     * Scope : private
+     * Function Name : convertJsonStringToMap
+     * ----------------------------------------------------------------------------------------
+     * Description : Json 문자열을 Map<String, Object> 형태로 반환
+     * 
+     ******************************************************************************************/
     public static Map<String, Object> convertJsonStringToMap(String jsonString) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.readValue(jsonString, new TypeReference<Map<String, Object>>() {});
     }
 
+    /*
+     * ****************************************************************************************
+     * Title : 현재 시간 반환
+     * Scope : private
+     * Function Name : getLocalTime
+     * ----------------------------------------------------------------------------------------
+     * Description : "yyyy.MM.dd HH:mm:ss" 형태의 현재 시간정보를 반환한다.
+     * 
+     ******************************************************************************************/
     public static String getLocalTime() {
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
         return now.format(formatter);
     }
 
-    // 현재 시간보다 10분 전의 시간을 반환
-    public static long getTenMinutesAgoLocalTimestamp() {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime tenMinutesAgo = now.minusMinutes(10);
-        return Timestamp.valueOf(tenMinutesAgo).getTime() / 1000;
-    }
-
-    public static long getFirstDayOfMonthLocalTimestamp() {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime firstDayOfMonth = now.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
-        return Timestamp.valueOf(firstDayOfMonth).getTime() / 1000;
-    }
-
-    public static long getLocalTimestamp() {
-        return Instant.now().getEpochSecond();
-    }
-
+    
     public static String nullSafeString(String value) {
         return value != null ? value : "";
     }

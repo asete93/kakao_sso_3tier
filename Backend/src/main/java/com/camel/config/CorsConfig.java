@@ -1,3 +1,4 @@
+// 프록시 사용없이, CORS 허용 정책 활용할 때 사용.
 // package com.camel.config;
 // import java.util.Arrays;
 // import java.util.List;

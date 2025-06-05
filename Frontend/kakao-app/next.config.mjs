@@ -4,7 +4,7 @@ const nextConfig = {
         return [
             {
                 source: "/login/kakao",
-                destination: `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/v1/login/kakao`,
+                destination: `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/v1/kakao/login`,
             },
             {
                 source: "/refresh/token",

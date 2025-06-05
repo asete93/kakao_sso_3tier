@@ -7,7 +7,8 @@ import com.camel.api.user.model.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
+    
     public User findByUserIdAndProviderAndDeletedAtIsNull(String userId,String provider);
-
+    
     public User findByIdAndDeletedAtIsNull(int id);
 }

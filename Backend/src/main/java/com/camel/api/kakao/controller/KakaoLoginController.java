@@ -19,7 +19,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 
 @RestController
-@RequestMapping("/api/v1/login")
+@RequestMapping("/api/v1/kakao")
 @CrossOrigin
 public class KakaoLoginController {
 
@@ -30,10 +30,8 @@ public class KakaoLoginController {
     JwtTokenService jwtTokenService;
 
 
-
-
     /* ****************************************************************************************
-     * Title            :   카카오 SSO 로그인 후, 쿠키에 JWT 토큰 저장 API
+     * Title            :   카카오 SSO 로그인
      * Scope            :   public
      * Method           :   POST
      * Function Name    :   KakaoOauthLogin                                                    
@@ -42,7 +40,7 @@ public class KakaoLoginController {
      *                      회원가입되어있지 않은 사용자의 경우, needSignup 값을 true로 반환한다.
      * 
      ******************************************************************************************/
-    @PostMapping("/kakao")
+    @PostMapping("/login")
     public ResponseEntity<CustomMap> KakaoOauthLogin(@RequestBody CustomMap param, HttpServletRequest request) {
         CustomMap rtnMap = new CustomMap();
         

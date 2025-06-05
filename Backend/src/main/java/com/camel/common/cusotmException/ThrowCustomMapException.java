@@ -2,6 +2,15 @@ package com.camel.common.cusotmException;
 
 import com.camel.common.CustomMap;
 
+/*
+* ****************************************************************************************
+* Title : Custom Exception
+* Scope : public
+* Class Name : ThrowCustomMapException
+* ----------------------------------------------------------------------------------------
+* Description : 사용자 정의 Exception
+* 
+******************************************************************************************/
 public class ThrowCustomMapException extends Exception {
     private final CustomMap response;
 

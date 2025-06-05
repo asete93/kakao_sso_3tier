@@ -1,0 +1,25 @@
+FROM maven:3.9.6-eclipse-temurin-17
+
+ARG PROXY_ADDR
+ENV PROXY_ADDR=${PROXY_ADDR}
+
+EXPOSE 8083
+RUN mkdir -p /app
+RUN echo "Acquire::http::proxy \"${PROXY_ADDR}\";" > /etc/apt/apt.conf.d/90proxy && \
+    echo "Acquire::https::proxy \"${PROXY_ADDR}\";" >> /etc/apt/apt.conf.d/90proxy
+
+RUN mkdir -p /root/.gradle && \
+    echo "systemProp.http.proxyHost=$(echo ${PROXY_ADDR} | sed 's|http://||' | cut -d: -f1)" >> /root/.gradle/gradle.properties && \
+    echo "systemProp.http.proxyPort=$(echo ${PROXY_ADDR} | sed 's|http://||' | cut -d: -f2)" >> /root/.gradle/gradle.properties && \
+    echo "systemProp.https.proxyHost=$(echo ${PROXY_ADDR} | sed 's|http://||' | cut -d: -f1)" >> /root/.gradle/gradle.properties && \
+    echo "systemProp.https.proxyPort=$(echo ${PROXY_ADDR} | sed 's|http://||' | cut -d: -f2)" >> /root/.gradle/gradle.properties
+
+RUN apt update -y
+
+COPY ../Backend/. ./
+RUN chmod +x ./gradlew
+RUN ./gradlew bootjar
+RUN cp ./build/libs/kakao-api-server-0.0.1-SNAPSHOT.jar /app/app.jar
+
+# ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+ENTRYPOINT ["./gradlew", "bootrun"]

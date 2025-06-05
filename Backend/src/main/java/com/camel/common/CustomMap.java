@@ -139,8 +139,8 @@ public class CustomMap extends HashMap<String, Object> {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             HashMap<String, Object> rawMap = objectMapper.readValue(jsonString, new TypeReference<HashMap<String, Object>>() {});
-            this.clear();        // 기존 값 제거 (선택사항)
-            this.putAll(rawMap); // 현재 객체에 넣기
+            this.clear();
+            this.putAll(rawMap);
         } catch (Exception e) {
             e.printStackTrace();
         }

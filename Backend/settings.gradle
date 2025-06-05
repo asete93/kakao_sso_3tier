@@ -5,4 +5,4 @@ pluginManagement {
 		gradlePluginPortal()
 	}
 }
-rootProject.name = 'camel-api-server'
+rootProject.name = 'kakao-api-server'
