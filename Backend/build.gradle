@@ -64,6 +64,9 @@ dependencies {
 
 	// Database Schema Manager
 	implementation 'org.liquibase:liquibase-core'
+
+	// ENV
+	implementation "me.paulschwarz:spring-dotenv:3.0.0"
 }
 
 tasks.named('test') {
@@ -71,17 +74,18 @@ tasks.named('test') {
 }
 
 bootRun {
-	def proxyAddr = System.getenv("PROXY_ADDR")
-	if (proxyAddr) {
-		def host = proxyAddr.replace("http://", "").split(":")[0]
-        def port = proxyAddr.replace("http://", "").split(":")[1]
-        
-        systemProperty 'http.proxyHost', host
-        systemProperty 'http.proxyPort', port
-        systemProperty 'https.proxyHost', host
-        systemProperty 'https.proxyPort', port
-
-		println "Using proxy: ${host}:${port}"
+	try {
+		def dotenv = file("../.env")
+		if (dotenv.exists()) {
+			dotenv.readLines().each { line ->
+				if (line && line.contains("=")) {
+					def (key, value) = line.split("=", 2)
+					systemProperty key.trim(), value.trim()
+				}
+			}
+		}
+	} catch (Exception e){
+		e.printStackTrace();
 	}
 
     systemProperty 'server.port', '8083'

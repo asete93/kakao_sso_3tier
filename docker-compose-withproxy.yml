@@ -12,18 +12,24 @@ services:
       - 3348:3306
     restart: always
     environment:
-      - MYSQL_USER=
-      - MYSQL_ROOT_PASSWORD=Zmffkdnem12
-      - MYSQL_PASSWORD=Zmffkdnem12
-      - MYSQL_DATABASE=kakao
-    mem_limit: 4096M
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+    mem_limit: ${DB_MEM_LIMIT}
 
   backend:
     container_name: kakaologin-backend
     build:
       context: .
-      dockerfile: Dockerfiles/Dockerfile_Backend
+      dockerfile: Dockerfiles/Dockerfile_Backend_With_Proxy
+      args:
+        PROXY_ADDR: ${PROXY_ADDR}
     depends_on: ["mysql"]
     ports:
       - 8083:8083
     restart: always
+    environment:
+      - HTTP_PROXY=${PROXY_ADDR}
+      - HTTPS_PROXY=${PROXY_ADDR}
+      - NO_PROXY=localhost,127.0.0.1,.local

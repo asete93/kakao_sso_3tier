@@ -142,9 +142,8 @@ public class KakaoLoginService {
 
         // Call Kakao Oauth API
         CustomMap apiResult = apiClient.postClient(makeKakaoOauthUrl(code), null, oauthHeader);
-        
+        System.out.println(makeKakaoOauthUrl(code));
         int status = apiResult.getInt("status");
-
         if(status == 200){
             return new CustomMap(apiResult.getString("body")).getString("access_token");
         } else {

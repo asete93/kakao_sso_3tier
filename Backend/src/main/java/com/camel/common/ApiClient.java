@@ -1,5 +1,6 @@
 package com.camel.common;
 
+import org.apache.http.HttpHost;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
@@ -35,11 +36,25 @@ public class ApiClient {
 
 
     public CloseableHttpClient createClient(CookieStore cookieStore) throws Exception {
-        CloseableHttpClient httpClient = HttpClientBuilder.create()
-				.setDefaultCookieStore(cookieStore) // Set CookieStore
-				.build();
+        HttpClientBuilder builder = HttpClientBuilder.create()
+            .setDefaultCookieStore(cookieStore); // Set CookieStore
 
-        return httpClient;
+        // Docker와 같이 컨테이너로 구동하여, DNS 정보가 달라져 Proxy가 필요한 경우, Proxy 활용하도록 수정.
+        // 일반적으로 로컬빌드할 경우, 이부분은 필요없다.
+        String proxyAddr = System.getenv("PROXY_ADDR");
+        if (proxyAddr != null && proxyAddr.startsWith("http://")) {
+            try {
+                String proxyHostPort = proxyAddr.replace("http://", "");
+                String[] parts = proxyHostPort.split(":");
+                String host = parts[0];
+                int port = Integer.parseInt(parts[1]);
+                builder.setProxy(new HttpHost(host, port));
+            } catch (Exception e) {
+                System.err.println("Invalid PROXY_ADDR format: " + proxyAddr);
+            }
+        }
+
+        return builder.build();
     }
 
 
