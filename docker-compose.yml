@@ -9,21 +9,34 @@ services:
       - ./Database/data/db/conf.d:/etc/mysql/conf.d
       - ./Database/data/db/data:/var/lib/mysql
     ports:
-      - 3348:3306
+      - ${DATABASE_PORT}:3306
     restart: always
     environment:
-      - MYSQL_USER=
-      - MYSQL_ROOT_PASSWORD=Zmffkdnem12
-      - MYSQL_PASSWORD=Zmffkdnem12
-      - MYSQL_DATABASE=kakao
-    mem_limit: 4096M
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+    mem_limit: ${DB_MEM_LIMIT}
 
   backend:
     container_name: kakaologin-backend
     build:
       context: .
       dockerfile: Dockerfiles/Dockerfile_Backend
+      args:
+        BACKEND_PORT: ${BACKEND_PORT}
     depends_on: ["mysql"]
     ports:
-      - 8083:8083
+      - ${BACKEND_PORT}:${BACKEND_PORT}
+    restart: always
+
+  frontend:
+    container_name: kakaologin-frontend
+    build:
+      context: .
+      dockerfile: Dockerfiles/Dockerfile_Frontend
+      args:
+        PORT: ${PORT}
+    ports:
+      - ${PORT}:${PORT}
     restart: always

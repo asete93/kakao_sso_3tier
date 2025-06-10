@@ -9,7 +9,7 @@ services:
       - ./Database/data/db/conf.d:/etc/mysql/conf.d
       - ./Database/data/db/data:/var/lib/mysql
     ports:
-      - 3348:3306
+      - ${DATABASE_PORT}:3306
     restart: always
     environment:
       - MYSQL_USER=${MYSQL_USER}
@@ -25,11 +25,27 @@ services:
       dockerfile: Dockerfiles/Dockerfile_Backend_With_Proxy
       args:
         PROXY_ADDR: ${PROXY_ADDR}
+        BACKEND_PORT: ${BACKEND_PORT}
     depends_on: ["mysql"]
     ports:
-      - 8083:8083
+      - ${BACKEND_PORT}:${BACKEND_PORT}
     restart: always
     environment:
       - HTTP_PROXY=${PROXY_ADDR}
       - HTTPS_PROXY=${PROXY_ADDR}
       - NO_PROXY=localhost,127.0.0.1,.local
+
+  frontend:
+    container_name: kakaologin-frontend
+    build:
+      context: .
+      dockerfile: Dockerfiles/Dockerfile_Frontend
+      args:
+        PORT: ${PORT}
+    ports:
+      - ${PORT}:${PORT}
+    restart: always
+    # environment:
+    #   - NEXT_PUBLIC_KAKAO_REST_KEY=${NEXT_PUBLIC_KAKAO_REST_KEY}
+    #   - NEXT_PUBLIC_API_SERVER_URL=${NEXT_PUBLIC_API_SERVER_URL}
+    #   - NEXT_PUBLIC_KAKAO_REDIRECT_URI=${NEXT_PUBLIC_KAKAO_REDIRECT_URI}

@@ -1,14 +1,14 @@
-FROM node
+FROM node:20.19.0-bullseye
+
+ARG PORT
+
+WORKDIR /app/kakao-app
 
 COPY ../.env /.env
-COPY ../Backend/. ./
+COPY ../Frontend/kakao-app/. ./
 
-EXPOSE 8080
-WORKDIR /app
+EXPOSE ${PROXY_ADDR}
 
-RUN apt update -y
-RUN chmod +x ./gradlew
-RUN ./gradlew bootjar
-RUN cp ./build/libs/kakao-api-server-0.0.1-SNAPSHOT.jar /app/app.jar
+RUN npm install
 
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+ENTRYPOINT ["npm", "run", "dev"]

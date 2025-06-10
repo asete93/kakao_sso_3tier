@@ -1,10 +1,12 @@
 FROM maven:3.9.6-eclipse-temurin-17
 
+ARG BACKEND_PORT
+
+WORKDIR /app
 COPY ../.env /.env
 COPY ../Backend/. ./
 
-EXPOSE 8080
-WORKDIR /app
+EXPOSE ${BACKEND_PORT}
 
 RUN apt update -y
 RUN chmod +x ./gradlew

@@ -44,10 +44,10 @@ const LoginKakao = () => {
 
 
     const handleClick = async () => {
-        const REDIRECT_URI = `http://100.68.107.86:3002/login?type=kakao`;
+        const REDIRECT_URI = process.env.NEXT_PUBLIC_KAKAO_REDIRECT_URI;
         const KAKAO_REST_API_KEY = process.env.NEXT_PUBLIC_KAKAO_REST_KEY;
-        // const kakaoRedirectUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${KAKAO_REST_API_KEY}&redirect_uri=${REDIRECT_URI}&prompt=login`;
-        const kakaoRedirectUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${KAKAO_REST_API_KEY}&redirect_uri=${REDIRECT_URI}`;
+        const KAKAO_LOGIN_PROMPT_YN = process?.env?.NEXT_PUBLIC_KAKAO_LOGIN_PROMPT_YN=="1"?true:false;
+        const kakaoRedirectUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${KAKAO_REST_API_KEY}&redirect_uri=${REDIRECT_URI}${KAKAO_LOGIN_PROMPT_YN?"&prompt=login":""}`;
         window.location.href = kakaoRedirectUrl;
     }
 

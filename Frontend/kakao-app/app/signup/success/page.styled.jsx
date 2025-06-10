@@ -1,4 +1,5 @@
-import styled from "styled-components";
+import styled,  { keyframes } from "styled-components";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
 
 export const SLayout = styled.div`
     display: flex;
@@ -60,4 +61,34 @@ export const SSignupButton = styled.div`
         background-color: #081274;
     }
     
+`
+
+const spin = keyframes`
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+`;
+
+export const SLoadingIcon = styled(AiOutlineLoading3Quarters)`
+  font-size: 48px; // 아이콘 크기
+  animation: ${spin} 1s linear infinite; // 1초마다 한 바퀴 회전
+`;
+
+
+export const SLoadingDiv = styled.div`
+    z-index: 1000;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(3px);
+    pointer-events: all;
 `

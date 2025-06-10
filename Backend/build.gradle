@@ -76,23 +76,32 @@ tasks.named('test') {
 bootRun {
 	try {
 		def dotenv = file("../.env")
+		def envMap = [:]  // .env에서 읽은 변수들을 저장할 Map
+
 		if (dotenv.exists()) {
 			dotenv.readLines().each { line ->
 				if (line && line.contains("=")) {
 					def (key, value) = line.split("=", 2)
-					systemProperty key.trim(), value.trim()
+					key = key.trim()
+					value = value.trim()
+					envMap[key] = value
+					systemProperty key, value  // 전체도 systemProperty에 등록
 				}
 			}
 		}
-	} catch (Exception e){
-		e.printStackTrace();
-	}
 
-    systemProperty 'server.port', '8083'
-	systemProperty 'spring.devtools.restart.enabled', 'false' // 선택 사항: Hot swapping 비활성화
-    systemProperty 'spring.output.ansi.enabled', 'ALWAYS'
-    jvmArgs = [
-        '-Xdebug',
-        '-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005'
-    ]
+		// BACKEND_PORT 값이 있으면 server.port에 설정
+		def backendPort = envMap["BACKEND_PORT"] ?: "8080"
+		systemProperty 'server.port', backendPort
+
+		systemProperty 'spring.devtools.restart.enabled', 'false'
+		systemProperty 'spring.output.ansi.enabled', 'ALWAYS'
+
+		jvmArgs = [
+			'-Xdebug',
+			'-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005'
+		]
+	} catch (Exception e) {
+		e.printStackTrace()
+	}
 }

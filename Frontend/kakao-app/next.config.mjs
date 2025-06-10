@@ -1,3 +1,15 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+
+// __dirname 대체 코드
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// 상위 폴더의 .env 로드
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     async rewrites() {
@@ -31,6 +43,12 @@ const nextConfig = {
 
     reactStrictMode: false,
 
+    env: {
+        NEXT_PUBLIC_KAKAO_REST_KEY: process.env.NEXT_PUBLIC_KAKAO_REST_KEY,
+        NEXT_PUBLIC_API_SERVER_URL: process.env.NEXT_PUBLIC_API_SERVER_URL,
+        NEXT_PUBLIC_KAKAO_REDIRECT_URI: process.env.NEXT_PUBLIC_KAKAO_REDIRECT_URI,
+        NEXT_PUBLIC_KAKAO_LOGIN_PROMPT_YN: process.env.NEXT_PUBLIC_KAKAO_LOGIN_PROMPT_YN,
+    },
 };
 
 
