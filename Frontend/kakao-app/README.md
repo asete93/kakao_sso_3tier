@@ -4,7 +4,6 @@ npm install
 npm run dev
 
 
-
 # Styled Components SSR 처리
 1. next.config.js 에 하기 내용 추가.
 
