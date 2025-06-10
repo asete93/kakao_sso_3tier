@@ -16,13 +16,13 @@ RUN mkdir -p /root/.gradle && \
     echo "systemProp.https.proxyHost=$(echo ${PROXY_ADDR} | sed 's|http://||' | cut -d: -f1)" >> /root/.gradle/gradle.properties && \
     echo "systemProp.https.proxyPort=$(echo ${PROXY_ADDR} | sed 's|http://||' | cut -d: -f2)" >> /root/.gradle/gradle.properties
 
-RUN apt update -y
-
 COPY ../.env /.env
 COPY ../Backend/. ./
+
+RUN apt update -y && apt install -y dos2unix
+RUN dos2unix gradlew && chmod +x gradlew
 RUN chmod +x ./gradlew
 RUN ./gradlew bootjar
 RUN cp ./build/libs/kakao-api-server-0.0.1-SNAPSHOT.jar /app/app.jar
 
-# ENTRYPOINT ["java", "-jar", "/app/app.jar"]
 ENTRYPOINT ["./gradlew", "bootrun"]

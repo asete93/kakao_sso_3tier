@@ -77,7 +77,6 @@ bootRun {
 	try {
 		def dotenv = file("../.env")
 		def envMap = [:]  // .env에서 읽은 변수들을 저장할 Map
-
 		if (dotenv.exists()) {
 			dotenv.readLines().each { line ->
 				if (line && line.contains("=")) {
