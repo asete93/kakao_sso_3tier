@@ -35,6 +35,9 @@
 ![카카오_어플리케이션_등록_3](https://github.com/user-attachments/assets/45c3081c-7b93-4778-be99-fcc56651ce53)
   
 
+#### &emsp;1-4. 카카오 어플리케이션 REST API 키 발급
+![카카오_어플리케이션_등록_4](https://github.com/user-attachments/assets/3fc4f659-f7f5-4343-8b8e-4ae3d2073bfe)
+
 ---
   
   
@@ -79,3 +82,34 @@
 | NEXT_PUBLIC_KAKAO_REDIRECT_URI | http://[Frontend ip address]:[Frontend Port]/login?type=kakao | 필수 | 위 어플리케이션에서 등록한 Redirect URI와 동일한 값을 넣어야하며, Frontend ip와 Port는 이 설정의 PORT값과, 이 Frontend를 띄울 서버의 IP값을 입력한다. |
 | NEXT_PUBLIC_KAKAO_LOGIN_PROMPT_YN | 0 | 필수 | 매 카카오로그인마다 계정 정보를 물을것인지를 정한다, 1인 경우 매번 묻고, 0인 경우 가장 최근에 로그인한 계정으로 자동 로그인한다. |
 | PORT | 8080 | 필수 | Frontend Server Port |
+
+---
+  
+  
+#### 3. Build & Deploy
+#### &emsp;3-1. Docker 환경으로 시작하기
+
+- Proxy 환경이 필요하지 않은경우.    
+`docker compose up -d --build`
+
+- Proxy 환경이 필요한 경우.    
+`docker compose -f docker-compose-tinyproxy.yml up -d --build`  
+`docker compose -f docker-compose-withproxy.yml up -d --build`  
+
+
+#### &emsp;3-2. Local 환경으로 시작하기
+- Database Setting.  
+`docker compose up mysql -d --build`  
+
+- Backend Setting.  
+`cd Backend && ./gradlew bootrun`  
+
+- Frontend Setting.  
+`cd Frontend/kakao-app && npm i && npm run dev`  
+
+
+---
+
+#### 4. 화면
+#### 4-1. Login 화면,  KAKAO 버튼만 동작함.
+![image](https://github.com/user-attachments/assets/444b25dc-8234-49d9-a8d8-6da5c4753bc8)
