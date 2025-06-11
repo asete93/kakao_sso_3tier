@@ -1,0 +1,31 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: camel
+      changes:
+        - createTable:
+            tableName: USERS
+            columns:
+              - column:
+                  name: ID
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: USERNAME
+                  type: VARCHAR(100)
+              - column:
+                  name: USER_ID
+                  type: VARCHAR(100)
+              - column:
+                  name: PROVIDER
+                  type: VARCHAR(100)
+              - column:
+                  name: CREATED_AT
+                  type: DATETIME
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: DELETED_AT
+                  type: DATETIME

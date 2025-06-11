@@ -1,0 +1,19 @@
+# Database
+Database/data
+
+# Backend
+Backend/.gradle
+Backend/build
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+# Frontend
+
+
+# etc
+.vscode

@@ -1,0 +1,14 @@
+FROM node:20.19.0-bullseye
+
+ARG PORT
+
+WORKDIR /app/kakao-app
+
+COPY ../.env /.env
+COPY ../Frontend/kakao-app/. ./
+
+EXPOSE ${PROXY_ADDR}
+
+RUN npm install
+
+ENTRYPOINT ["npm", "run", "dev"]

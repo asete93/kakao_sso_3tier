@@ -1,0 +1,26 @@
+FROM maven:3.9.6-eclipse-temurin-17
+
+ARG PROXY_ADDR
+ARG BACKEND_PORT
+ENV PROXY_ADDR=${PROXY_ADDR}
+ENV BACKEND_PORT=${BACKEND_PORT}
+
+EXPOSE 8083
+WORKDIR /app
+RUN echo "Acquire::http::proxy \"${PROXY_ADDR}\";" > /etc/apt/apt.conf.d/90proxy && \
+    echo "Acquire::https::proxy \"${PROXY_ADDR}\";" >> /etc/apt/apt.conf.d/90proxy
+
+RUN mkdir -p /root/.gradle && \
+    echo "systemProp.http.proxyHost=$(echo ${PROXY_ADDR} | sed 's|http://||' | cut -d: -f1)" >> /root/.gradle/gradle.properties && \
+    echo "systemProp.http.proxyPort=$(echo ${PROXY_ADDR} | sed 's|http://||' | cut -d: -f2)" >> /root/.gradle/gradle.properties && \
+    echo "systemProp.https.proxyHost=$(echo ${PROXY_ADDR} | sed 's|http://||' | cut -d: -f1)" >> /root/.gradle/gradle.properties && \
+    echo "systemProp.https.proxyPort=$(echo ${PROXY_ADDR} | sed 's|http://||' | cut -d: -f2)" >> /root/.gradle/gradle.properties
+
+COPY ../.env /.env
+COPY ../Backend/. ./
+
+RUN apt update -y && apt install -y dos2unix
+RUN dos2unix gradlew && chmod +x gradlew
+RUN chmod +x ./gradlew
+
+ENTRYPOINT ["./gradlew", "bootrun"]

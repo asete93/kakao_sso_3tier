@@ -1,0 +1,51 @@
+version: '3.4'
+services:
+  mysql:
+    container_name: kakaologin-db
+    build:
+      context: .
+      dockerfile: Dockerfiles/Dockerfile_DB
+    volumes:
+      - ./Database/data/db/conf.d:/etc/mysql/conf.d
+      - ./Database/data/db/data:/var/lib/mysql
+    ports:
+      - ${DATABASE_PORT}:3306
+    restart: always
+    environment:
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+    mem_limit: ${DB_MEM_LIMIT}
+
+  backend:
+    container_name: kakaologin-backend
+    build:
+      context: .
+      dockerfile: Dockerfiles/Dockerfile_Backend_With_Proxy
+      args:
+        PROXY_ADDR: ${PROXY_ADDR}
+        BACKEND_PORT: ${BACKEND_PORT}
+    depends_on: ["mysql"]
+    ports:
+      - ${BACKEND_PORT}:${BACKEND_PORT}
+    restart: always
+    environment:
+      - HTTP_PROXY=${PROXY_ADDR}
+      - HTTPS_PROXY=${PROXY_ADDR}
+      - NO_PROXY=localhost,127.0.0.1,.local
+
+  frontend:
+    container_name: kakaologin-frontend
+    build:
+      context: .
+      dockerfile: Dockerfiles/Dockerfile_Frontend
+      args:
+        PORT: ${PORT}
+    ports:
+      - ${PORT}:${PORT}
+    restart: always
+    # environment:
+    #   - NEXT_PUBLIC_KAKAO_REST_KEY=${NEXT_PUBLIC_KAKAO_REST_KEY}
+    #   - NEXT_PUBLIC_API_SERVER_URL=${NEXT_PUBLIC_API_SERVER_URL}
+    #   - NEXT_PUBLIC_KAKAO_REDIRECT_URI=${NEXT_PUBLIC_KAKAO_REDIRECT_URI}

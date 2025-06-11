@@ -1,0 +1,10 @@
+version: '3.4'
+
+services:
+  tinyproxy:
+    image: vimagick/tinyproxy
+    container_name: tinyproxy
+    network_mode: host
+    environment:
+      - TZ=Asia/Seoul
+      - ALLOW=0.0.0.0/0

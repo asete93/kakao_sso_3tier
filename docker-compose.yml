@@ -1,0 +1,42 @@
+version: '3.4'
+services:
+  mysql:
+    container_name: kakaologin-db
+    build:
+      context: .
+      dockerfile: Dockerfiles/Dockerfile_DB
+    volumes:
+      - ./Database/data/db/conf.d:/etc/mysql/conf.d
+      - ./Database/data/db/data:/var/lib/mysql
+    ports:
+      - ${DATABASE_PORT}:3306
+    restart: always
+    environment:
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+    mem_limit: ${DB_MEM_LIMIT}
+
+  backend:
+    container_name: kakaologin-backend
+    build:
+      context: .
+      dockerfile: Dockerfiles/Dockerfile_Backend
+      args:
+        BACKEND_PORT: ${BACKEND_PORT}
+    depends_on: ["mysql"]
+    ports:
+      - ${BACKEND_PORT}:${BACKEND_PORT}
+    restart: always
+
+  frontend:
+    container_name: kakaologin-frontend
+    build:
+      context: .
+      dockerfile: Dockerfiles/Dockerfile_Frontend
+      args:
+        PORT: ${PORT}
+    ports:
+      - ${PORT}:${PORT}
+    restart: always
