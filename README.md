@@ -18,7 +18,7 @@
 ### 1-2. 로그인 연동 설정
 - **Redirect URI**는 반드시 아래 형태로 입력:  
   `http://[FrontServerIP]:[FrontServerPort]/login?type=kakao`
-- 초기 설정 시 FrontServer IP는 해당 장비 IP, Port는 **3000** 사용 권장  
+- Front ServerIP와 Port를 모를 경우, 우선 서버를 띄울 장비의 IP address와 Port는 **3000**으로 입력.
   → 이후 `.env`와 동기화 필요
 
 ![카카오 앱 등록 2](https://github.com/user-attachments/assets/1df49f13-4cfd-4389-9779-7fa49ee1c960)
@@ -44,7 +44,7 @@
 | MYSQL_ROOT_PASSWORD | TEST_ROOT_PASSWORD | ✅ | DB 루트 비밀번호 |
 | MYSQL_PASSWORD | TEST_USER_PASSWORD | ✅ | DB 사용자 비밀번호 |
 | MYSQL_DATABASE | TEST_DATABASE_NAME | ✅ | DB 이름 |
-| DB_MEM_LIMIT | 4096M | ⛔ | 컨테이너 메모리 제한 (선택) |
+| DB_MEM_LIMIT | 4096M |  | 컨테이너 메모리 제한 (선택) |
 | DATABASE_PORT | 3306 | ✅ | DB 포트 |
 
 ---
@@ -53,16 +53,16 @@
 
 | Key | Example | 필수 | 설명 |
 |-----|---------|------|------|
-| PROXY_ADDR | http://192.168.0.100:8888 | ⛔ | Proxy 설정 필요 시 사용 |
+| PROXY_ADDR | http://192.168.0.100:8888 |  | 프록시 서버정보, Docker와 같이 컨테이너를 활용하는 경우 필요할 수 있음. docker-compose-tinyproxy.tml을 통해 tinyproxy를 쓴다면, 기본 8888 포트로 되어 있음. |
 | BACKEND_PORT | 8080 | ✅ | 백엔드 서버 포트 |
-| DB_URL | jdbc:mysql://192.168.0.100:3306/TEST_DATABASE_NAME | ✅ | DB 접속 URL |
-| DB_USERNAME | TEST_USER_NAME | ✅ | DB 사용자명 |
-| DB_PASSWORD | TEST_USER_PASSWORD | ✅ | DB 비밀번호 |
-| KAKAO_OAUTH_URL | https://kauth.kakao.com/oauth/token | ✅ | 카카오 OAuth 토큰 요청 URL |
-| KAKAO_GRANT_TYPE | grant_type=authorization_code | ✅ | 고정값 |
+| DB_URL | jdbc:mysql://192.168.0.100:3306/TEST_DATABASE_NAME | ✅ | DB URL, 위 DB 환경설정 값을 기반으로 작성 |
+| DB_USERNAME | TEST_USER_NAME | ✅ | DB 사용자명, 위 DB 환경설정 값을 기반으로 작성 |
+| DB_PASSWORD | TEST_USER_PASSWORD | ✅ | DB 사용자 비밀번호, 위 DB 환경설정 값을 기반으로 작성 |
+| KAKAO_OAUTH_URL | https://kauth.kakao.com/oauth/token | ✅ | 카카오 SSO에 활용되는 URL로 변경은 필요없음. |
+| KAKAO_GRANT_TYPE | grant_type=authorization_code | ✅ | 카카오 SSO과정에서 권한 획득을 위한 값으로, 현재 프로젝트 예시에서는 변경이 필요없으나, 기능상 변경이 필요하다면 변경해서 진행. |
 | KAKAO_USER_INFO_URL | https://kapi.kakao.com/v2/user/me | ✅ | 사용자 정보 요청 URL |
-| KAKAO_CLIENT_ID | (REST API 키) | ✅ | 카카오 앱에서 발급받은 키 |
-| JWT_TOKEN_SECRET | (랜덤 문자열) | ✅ | JWT 암호화 키 (충분히 복잡해야 함) |
+| KAKAO_CLIENT_ID | (REST API 키) | ✅ | 위에서 어플리케이션을 등록한 시점에 [앱키] 항목에서 REST API 키 항목 값을 입력. |
+| JWT_TOKEN_SECRET | (랜덤 문자열) | ✅ | JWT 토큰을 암호화할때 쓰이는 값으로, 아무값이나 입력할 수 있지만, 너무 짧은 문자열로는 불가능. |
 
 ---
 
@@ -70,10 +70,10 @@
 
 | Key | Example | 필수 | 설명 |
 |-----|---------|------|------|
-| NEXT_PUBLIC_KAKAO_REST_KEY | (REST API 키) | ✅ | 카카오 앱 REST API 키 |
-| NEXT_PUBLIC_API_SERVER_URL | http://[BackendIP]:[Port] | ✅ | 백엔드 주소 |
-| NEXT_PUBLIC_KAKAO_REDIRECT_URI | http://[FrontendIP]:[Port]/login?type=kakao | ✅ | 카카오에 등록한 Redirect URI |
-| NEXT_PUBLIC_KAKAO_LOGIN_PROMPT_YN | 0 | ✅ | 1: 매번 계정선택 / 0: 자동 로그인 |
+| NEXT_PUBLIC_KAKAO_REST_KEY | (REST API 키) | ✅ | 위에서 어플리케이션을 등록한 시점에 [앱키] 항목에서 REST API 키 항목 값을 입력. Backend의 KAKAO_CLIENT_ID값과 동일한 값 |
+| NEXT_PUBLIC_API_SERVER_URL | http://[BackendIP]:[Port] | ✅ | Backend Server 정보, 위 Backend 환경설정 값을 기반으로 작성 |
+| NEXT_PUBLIC_KAKAO_REDIRECT_URI | http://[FrontendIP]:[Port]/login?type=kakao | ✅ | 위 어플리케이션에서 등록한 Redirect URI와 동일한 값을 넣어야하며, Frontend ip와 Port는 이 설정의 PORT값과, 이 Frontend를 띄울 서버의 IP값을 입력한다. |
+| NEXT_PUBLIC_KAKAO_LOGIN_PROMPT_YN | 0 | ✅ | 매 카카오로그인마다 계정 정보를 물을것인지를 정한다, 1인 경우 매번 묻고, 0인 경우 가장 최근에 로그인한 계정으로 자동 로그인한다. |
 | PORT | 8080 | ✅ | 프론트엔드 실행 포트 |
 
 ---
