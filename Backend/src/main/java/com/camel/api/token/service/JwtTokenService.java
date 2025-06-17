@@ -1,6 +1,7 @@
 package com.camel.api.token.service;
 
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.sql.Date;
 import java.util.Base64;
 import java.util.Map;
@@ -8,7 +9,6 @@ import java.util.Map;
 import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
@@ -18,6 +18,7 @@ import com.camel.api.user.service.UserService;
 import com.camel.common.CommonUtils;
 import com.camel.common.CustomMap;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -32,8 +33,14 @@ public class JwtTokenService {
     @Autowired
     private UserService userService;
 
-    @Value("${jwt.token.secret}")
-    private String JWT_TOKEN_SECRET;
+    private static final Dotenv dotenv = Dotenv.configure()
+            .directory("../")
+            .filename(".env")
+            .load();
+    private static final String JWT_TOKEN_SECRET = dotenv.get("JWT_TOKEN_SECRET") == null
+            || dotenv.get("JWT_TOKEN_SECRET").isEmpty()
+                    ? getSecretKey()
+                    : dotenv.get("JWT_TOKEN_SECRET");
 
     private String JWT_ISSUER = "CAMEL_API";
 
@@ -48,11 +55,13 @@ public class JwtTokenService {
     public static Integer REFRESH_TOKEN_TIME = ONE_HOUR * 24;
 
     /*
-     * ****************************************************************************************
+     * *****************************************************************************
+     * ***********
      * Title : JWT Token Map 생성
      * Scope : public
      * Function Name : createJwtTokenMap
-     * ----------------------------------------------------------------------------------------
+     * -----------------------------------------------------------------------------
+     * -----------
      * Description : access_token, refresh_token 이 담긴 CustomMap 생성
      * 
      ******************************************************************************************/
@@ -83,15 +92,18 @@ public class JwtTokenService {
     }
 
     /*
-     * ****************************************************************************************
+     * *****************************************************************************
+     * ***********
      * Title : Access_token 생성 (JWT)
      * Scope : private
      * Function Name : createAccessToken
-     * ----------------------------------------------------------------------------------------
+     * -----------------------------------------------------------------------------
+     * -----------
      * Description : access_token 생성
      * 
      ******************************************************************************************/
     private String createAccessToken(CustomMap claim) throws Exception {
+
         SecretKey key = Keys.hmacShaKeyFor(JWT_TOKEN_SECRET.getBytes(StandardCharsets.UTF_8));
 
         String userName = "";
@@ -114,11 +126,13 @@ public class JwtTokenService {
     }
 
     /*
-     * ****************************************************************************************
+     * *****************************************************************************
+     * ***********
      * Title : Refresh_token 생성 (JWT)
      * Scope : private
      * Function Name : createRefreshToken
-     * ----------------------------------------------------------------------------------------
+     * -----------------------------------------------------------------------------
+     * -----------
      * Description : refresh_token 생성
      * 
      ******************************************************************************************/
@@ -141,11 +155,13 @@ public class JwtTokenService {
     }
 
     /*
-     * ****************************************************************************************
+     * *****************************************************************************
+     * ***********
      * Title : 토큰 검증
      * Scope : public
      * Function Name : verifyToken
-     * ----------------------------------------------------------------------------------------
+     * -----------------------------------------------------------------------------
+     * -----------
      * Description : 토큰 유효성 검증
      * 
      ******************************************************************************************/
@@ -159,11 +175,13 @@ public class JwtTokenService {
     }
 
     /*
-     * ****************************************************************************************
+     * *****************************************************************************
+     * ***********
      * Title : 토큰 Parser
      * Scope : public
      * Function Name : tokenParser
-     * ----------------------------------------------------------------------------------------
+     * -----------------------------------------------------------------------------
+     * -----------
      * Description : 토큰 파서
      * 
      ******************************************************************************************/
@@ -188,11 +206,13 @@ public class JwtTokenService {
     }
 
     /*
-     * ****************************************************************************************
+     * *****************************************************************************
+     * ***********
      * Title : 토큰에서 ID 추출
      * Scope : public
      * Function Name : getIdFromToken
-     * ----------------------------------------------------------------------------------------
+     * -----------------------------------------------------------------------------
+     * -----------
      * Description : 토큰에서 사용자 ID 추출
      * 
      ******************************************************************************************/
@@ -209,11 +229,13 @@ public class JwtTokenService {
     }
 
     /*
-     * ****************************************************************************************
+     * *****************************************************************************
+     * ***********
      * Title : 사용자 ID 기준으로 Access Token 생성
      * Scope : public
      * Function Name : createAccessTokenById
-     * ----------------------------------------------------------------------------------------
+     * -----------------------------------------------------------------------------
+     * -----------
      * Description : 사용자 ID 기준으로 Access Token 생성
      * 
      ******************************************************************************************/
@@ -239,11 +261,13 @@ public class JwtTokenService {
     }
 
     /*
-     * ****************************************************************************************
+     * *****************************************************************************
+     * ***********
      * Title : 사용자 id값 기준으로 사용자 정보 가져오기
      * Scope : private
      * Function Name : getUserInfo
-     * ----------------------------------------------------------------------------------------
+     * -----------------------------------------------------------------------------
+     * -----------
      * Description : 사용자 id값 기준으로 사용자 정보 가져오기
      * 
      ******************************************************************************************/
@@ -252,13 +276,15 @@ public class JwtTokenService {
     }
 
     /*
-     * ****************************************************************************************
+     * *****************************************************************************
+     * ***********
      * Title : 쿠키 헤더 생성
      * Scope : public
      * Function Name : getCookieHeader
-     * ----------------------------------------------------------------------------------------
+     * -----------------------------------------------------------------------------
+     * -----------
      * Description : access_token, refresh_token, token에 user id가 있는 경우, _xjd 쿠키를 생성
-     *               _xjd 쿠키는, Frontend에서 로그인 유무를 판단하는 식별자.
+     * _xjd 쿠키는, Frontend에서 로그인 유무를 판단하는 식별자.
      * 
      ******************************************************************************************/
     public HttpHeaders getCookieHeader(CustomMap tokenMap, HttpServletRequest request) throws Exception {
@@ -302,6 +328,33 @@ public class JwtTokenService {
         headers.add(HttpHeaders.SET_COOKIE, refreshCookie.toString());
 
         return headers;
+    }
+
+    /*
+     * *****************************************************************************
+     * ***********
+     * Title : JWT 토큰 전용 키 생성
+     * Scope : private
+     * Function Name : getSecretKey
+     * -----------------------------------------------------------------------------
+     * -----------
+     * Description : JWT 토큰을 파싱할 수 있는 SecretKey 생성
+     * 
+     ******************************************************************************************/
+    private static String getSecretKey() {
+        int SECRET_LENGTH = 32;
+
+        byte[] keyBytes;
+
+        if (JWT_TOKEN_SECRET != null && !JWT_TOKEN_SECRET.trim().isEmpty()) {
+            keyBytes = JWT_TOKEN_SECRET.getBytes(StandardCharsets.UTF_8);
+        } else {
+            keyBytes = new byte[SECRET_LENGTH];
+            new SecureRandom().nextBytes(keyBytes);
+        }
+
+        // Base64로 인코딩된 문자열 반환
+        return Base64.getEncoder().encodeToString(keyBytes);
     }
 
 }

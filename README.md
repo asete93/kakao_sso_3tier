@@ -62,7 +62,7 @@
 | KAKAO_GRANT_TYPE | grant_type=authorization_code | ✅ | 카카오 SSO과정에서 권한 획득을 위한 값으로, 현재 프로젝트 예시에서는 변경이 필요없으나, 기능상 변경이 필요하다면 변경해서 진행. |
 | KAKAO_USER_INFO_URL | https://kapi.kakao.com/v2/user/me | ✅ | 사용자 정보 요청 URL |
 | KAKAO_CLIENT_ID | (REST API 키) | ✅ | 위에서 어플리케이션을 등록한 시점에 [앱키] 항목에서 REST API 키 항목 값을 입력. |
-| JWT_TOKEN_SECRET | (랜덤 문자열) | ✅ | JWT 토큰을 암호화할때 쓰이는 값으로, 아무값이나 입력할 수 있지만, 너무 짧은 문자열로는 불가능. |
+| JWT_TOKEN_SECRET | (랜덤 문자열) |  | JWT 토큰을 암호화할때 쓰이는 값으로, 32자 이상의 문자열 필요, 입력하지않은경우 랜덤 문자열 생성 |
 
 ---
 

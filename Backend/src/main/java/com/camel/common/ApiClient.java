@@ -2,6 +2,7 @@ package com.camel.common;
 
 import org.apache.http.HttpHost;
 import org.apache.http.client.CookieStore;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -11,11 +12,14 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ApiClient {
+    private final PoolingHttpClientConnectionManager connManager;
 
     // Methods
     final static String METHOD_GET = "GET";
@@ -27,6 +31,21 @@ public class ApiClient {
     // Encoding
     final static String CHARSET_UTF_8 = "UTF-8";
 
+    public ApiClient() {
+        // 커넥션 풀 초기화
+        connManager = new PoolingHttpClientConnectionManager();
+        connManager.setMaxTotal(100);             // 전체 커넥션 수 제한
+        connManager.setDefaultMaxPerRoute(20);    // 라우트당 최대 커넥션 수 제한
+    }
+
+    // 기본 설정용 RequestConfig
+    private RequestConfig getDefaultConfig() {
+        return RequestConfig.custom()
+            .setConnectTimeout(5000)
+            .setSocketTimeout(5000)
+            .build();
+    }
+
 
     // CloseableHttpClient 생성
     public CloseableHttpClient createClient() throws Exception {
@@ -35,17 +54,17 @@ public class ApiClient {
     }
 
 
-    public CloseableHttpClient createClient(CookieStore cookieStore) throws Exception {
-        HttpClientBuilder builder = HttpClientBuilder.create()
-            .setDefaultCookieStore(cookieStore); // Set CookieStore
+    public CloseableHttpClient createClient(CookieStore cookieStore) {
+        HttpClientBuilder builder = HttpClients.custom()
+            .setConnectionManager(connManager)
+            .setDefaultRequestConfig(getDefaultConfig())
+            .setDefaultCookieStore(cookieStore);
 
-        // Docker와 같이 컨테이너로 구동하여, DNS 정보가 달라져 Proxy가 필요한 경우, Proxy 활용하도록 수정.
-        // 일반적으로 로컬빌드할 경우, 이부분은 필요없다.
+        // 프록시 설정 (옵션)
         String proxyAddr = System.getenv("PROXY_ADDR");
         if (proxyAddr != null && proxyAddr.startsWith("http://")) {
             try {
-                String proxyHostPort = proxyAddr.replace("http://", "");
-                String[] parts = proxyHostPort.split(":");
+                String[] parts = proxyAddr.replace("http://", "").split(":");
                 String host = parts[0];
                 int port = Integer.parseInt(parts[1]);
                 builder.setProxy(new HttpHost(host, port));
@@ -64,15 +83,13 @@ public class ApiClient {
     *
     ******************************************************************************************/
     public CustomMap getClient(String url) throws Exception {
-        try(CloseableHttpClient client = createClient()){
-            return getClient(client, url, null); // Call Overloaded Method
-        }
+        CloseableHttpClient client = createClient();
+        return getClient(client, url, null); // Call Overloaded Method
     }
 
     public CustomMap getClient(String url, CustomMap headers) throws Exception {
-        try(CloseableHttpClient client = createClient()){
-            return getClient(client, url, headers); // Call Overloaded Method
-        }
+        CloseableHttpClient client = createClient();
+        return getClient(client, url, headers); // Call Overloaded Method
     }
 
     public CustomMap getClient(CloseableHttpClient client, String url) throws Exception {
@@ -103,15 +120,13 @@ public class ApiClient {
     *
     ******************************************************************************************/
     public CustomMap postClient(String url, CustomMap param) throws Exception {
-        try(CloseableHttpClient client = createClient()){
-            return postClient(client, url, param, null);  // Call Overloaded Method
-        }
+        CloseableHttpClient client = createClient();
+        return postClient(client, url, param, null);  // Call Overloaded Method
     }
 
     public CustomMap postClient(String url, CustomMap param, CustomMap headers) throws Exception {
-        try(CloseableHttpClient client = createClient()){
-            return postClient(client, url, param, headers);  // Call Overloaded Method
-        }
+        CloseableHttpClient client = createClient();
+        return postClient(client, url, param, headers);  // Call Overloaded Method
     }
 
     public CustomMap postClient(CloseableHttpClient client, String url, CustomMap param) throws Exception {
@@ -148,15 +163,13 @@ public class ApiClient {
     *
     ******************************************************************************************/
     public CustomMap putClient(String url, CustomMap param) throws Exception {
-        try(CloseableHttpClient client = createClient()){
-            return putClient(client, url, param, null);  // Call Overloaded Method
-        }
+        CloseableHttpClient client = createClient();
+        return putClient(client, url, param, null);  // Call Overloaded Method
     }
 
     public CustomMap putClient(String url, CustomMap param, CustomMap headers) throws Exception {
-        try(CloseableHttpClient client = createClient()){
-            return putClient(client, url, param, headers);  // Call Overloaded Method
-        }
+        CloseableHttpClient client = createClient();
+        return putClient(client, url, param, headers);  // Call Overloaded Method
     }
 
     public CustomMap putClient(CloseableHttpClient client, String url, CustomMap param) throws Exception {
@@ -195,15 +208,13 @@ public class ApiClient {
     *
     ******************************************************************************************/
     public CustomMap deleteClient(String url) throws Exception {
-        try(CloseableHttpClient client = createClient()){
-            return deleteClient(client, url, null);  // Call Overloaded Method
-        }
+        CloseableHttpClient client = createClient();
+        return deleteClient(client, url, null);  // Call Overloaded Method
     }
 
     public CustomMap deleteClient(String url, CustomMap headers) throws Exception {
-        try(CloseableHttpClient client = createClient()){
-            return deleteClient(client, url, headers);  // Call Overloaded Method
-        }
+        CloseableHttpClient client = createClient();
+        return deleteClient(client, url, headers);  // Call Overloaded Method
     }
 
     public CustomMap deleteClient(CloseableHttpClient client, String url) throws Exception {
