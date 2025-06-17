@@ -40,10 +40,10 @@
 
 | Key | Example | 필수 | 설명 |
 |-----|---------|------|------|
-| MYSQL_USER | TEST_USER_NAME | ✅ | DB 사용자명 |
-| MYSQL_ROOT_PASSWORD | TEST_ROOT_PASSWORD | ✅ | DB 루트 비밀번호 |
-| MYSQL_PASSWORD | TEST_USER_PASSWORD | ✅ | DB 사용자 비밀번호 |
-| MYSQL_DATABASE | TEST_DATABASE_NAME | ✅ | DB 이름 |
+| MYSQL_USER | kakao | ✅ | DB 사용자명 |
+| MYSQL_ROOT_PASSWORD | changeme | ✅ | DB 루트 비밀번호 |
+| MYSQL_PASSWORD | changeme | ✅ | DB 사용자 비밀번호 |
+| MYSQL_DATABASE | kakao | ✅ | DB 이름 |
 | DB_MEM_LIMIT | 4096M |  | 컨테이너 메모리 제한 (선택) |
 | DATABASE_PORT | 3306 | ✅ | DB 포트 |
 
@@ -55,9 +55,9 @@
 |-----|---------|------|------|
 | PROXY_ADDR | http://192.168.0.100:8888 |  | 프록시 서버정보, Docker와 같이 컨테이너를 활용하는 경우 필요할 수 있음. docker-compose-tinyproxy.tml을 통해 tinyproxy를 쓴다면, 기본 8888 포트로 되어 있음. |
 | BACKEND_PORT | 8080 | ✅ | 백엔드 서버 포트 |
-| DB_URL | jdbc:mysql://192.168.0.100:3306/TEST_DATABASE_NAME | ✅ | DB URL, 위 DB 환경설정 값을 기반으로 작성 |
-| DB_USERNAME | TEST_USER_NAME | ✅ | DB 사용자명, 위 DB 환경설정 값을 기반으로 작성 |
-| DB_PASSWORD | TEST_USER_PASSWORD | ✅ | DB 사용자 비밀번호, 위 DB 환경설정 값을 기반으로 작성 |
+| DB_URL | jdbc:mysql://192.168.0.100:3306/kakao | ✅ | DB URL, 위 DB 환경설정 값을 기반으로 작성 |
+| DB_USERNAME | kakao | ✅ | DB 사용자명, 위 DB 환경설정 값을 기반으로 작성 |
+| DB_PASSWORD | changeme | ✅ | DB 사용자 비밀번호, 위 DB 환경설정 값을 기반으로 작성 |
 | KAKAO_OAUTH_URL | https://kauth.kakao.com/oauth/token | ✅ | 카카오 SSO에 활용되는 URL로 변경은 필요없음. |
 | KAKAO_GRANT_TYPE | grant_type=authorization_code | ✅ | 카카오 SSO과정에서 권한 획득을 위한 값으로, 현재 프로젝트 예시에서는 변경이 필요없으나, 기능상 변경이 필요하다면 변경해서 진행. |
 | KAKAO_USER_INFO_URL | https://kapi.kakao.com/v2/user/me | ✅ | 사용자 정보 요청 URL |
